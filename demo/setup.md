@@ -51,21 +51,15 @@ docker inspect e28354082f09
 # this trick is taken from: https://stackoverflow.com/a/56741737
 ```
 
-# migrate-mongo
+# Use migrate-mongo
+`migrate-mongo` is installed as a dev dependency in the package. To use it from the `demo/app` directory, use this: `../../node_modules/.bin/migrate-mongo <command> <options>`.
+
+## Proper config
+The config file, where the migrations directory is specified, is at `./demo/migrate-mongo-config.js`. To use that config, use the `-f` option: `migrate-mongo <command> -f ../migrate-mongo-config.js`.
+
+## es5 modules
 With the `type: module` in `package.json`, `migrate-mongo` can't import the config file when it's `.js`: it has to be `.cjs`; yet neither can it find the default config file when it's `.cjs`; so I have to use the `-f` option, e.g.: `migrate-mongo status -f migrate-mongo-config.cjs`.
 `APP_DB_NAME=app APP_DB_USER=app APP_DB_PASS=jpiuh23r987y4g2 node_modules/.bin/migrate-mongo status -f migrate-mongo-config.cjs`
 
-# admin user
-username: admin_user
-password: oij31ohu23r-9j
-
-# test users
-username: test_user_1
-username: test_user_2
-username: test_user_3
-username: test_user_4
-username: test_user_5
-username: test_user_6
-username: test_user_7
-username: test_user_8
-password: oiuhewf09u3h
+## Apply migrations
+From `demo/app`, type this: `../../node_modules/.bin/migrate-mongo up -f ../migrate-mongo-config.js`
