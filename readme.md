@@ -5,7 +5,7 @@
 
 ## Setup
 ### Set up mongodb instance
-First, you have to setup your mongodb instance. For that, see `elsewhere`.
+First, you have to setup your mongodb instance. For that, see `demo/setup.md`.
 
 ### Apply migrations
 #### Point `migrate-mongo` to the migrations directory
