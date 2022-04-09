@@ -2,6 +2,8 @@ import Ajv from 'ajv'
 import {toTree} from 'ajv-errors-to-data-tree'
 import {traverseTree} from 'ajv-errors-to-data-tree/src/helpers.js'
 
+import * as m from 'bazar-api/app/src/messages.js'
+
 const ajv = new Ajv({allErrors: true, strictRequired: true})
 
 const otherProps = {
@@ -78,7 +80,13 @@ function filterErrors(errors) {
 function validate(fields) {
     if (_validate(fields)) return null
 
-    const errors = toTree(_validate.errors)
+    const errors = toTree(_validate.errors, (e) => {
+        return m.ValidationError.create(e.message, e.data)
+    })
 
     filterErrors(errors)
+
+    throw errors
 }
+
+export {validate as default, filterErrors}
