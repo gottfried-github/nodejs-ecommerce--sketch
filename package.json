@@ -1,0 +1,22 @@
+{
+  "name": "bazar-mongo",
+  "version": "0.0.1",
+  "description": "mongodb implementation of bazar e-commerce storage",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "/"
+  },
+  "keywords": [
+    "mongodb",
+    "e-commerce"
+  ],
+  "author": "gottfried",
+  "license": "MIT",
+  "devDependencies": {
+    "migrate-mongo": "^9.0.0"
+  }
+}
