@@ -77,14 +77,42 @@ function filterErrors(errors) {
     })
 }
 
+function validateBSON(fields) {
+    validateObjectId(fields.itemInitial)
+}
+
 function validate(fields) {
-    if (_validate(fields)) return null
+    if (_validate(fields)) {
+        try {
+            validateBSON(fields)
+        } catch(e) {
+            if (m.ValidationError.code !== e.code) throw e
+            throw {
+                errors: [],
+                node: {
+                    itemInitial: {
+                        errors: [e],
+                        node: null
+                    }
+                }
+            }
+        }
+    }
 
     const errors = toTree(_validate.errors, (e) => {
         return m.ValidationError.create(e.message, e.data)
     })
 
     filterErrors(errors)
+
+    if (errors.node.itemInitial?.errors.length) throw errors
+
+    try {
+        validateBSON(fields)
+    } catch(e) {
+        if (m.ValidationError.code !== e.code) throw e
+        errors.node.itemInitial.errors.push(e)
+    }
 
     throw errors
 }
