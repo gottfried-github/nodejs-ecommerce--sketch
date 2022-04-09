@@ -10,3 +10,7 @@ So, if `isInSale` is invalid or missing, we should report any errors regarding t
 # Setup
 ## The role of `migrate-mongo` in this project
 I only use the `create` command to create migration files. This doesn't seem to be connecting to the database, and using the `url` option in the config. So I commented it out entirely.
+
+# References
+## Behavior of the schema, defined in the `20220409125303-product-schema.js`
+See `~/basement/house/test/bazar-product-schema-mongodb` for examples of behavior for different data.
