@@ -131,4 +131,4 @@ function validate(fields) {
     return errors
 }
 
-export {validate as default, filterErrors}
+export {validate as default, filterErrors, _validate}
