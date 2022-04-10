@@ -2,7 +2,9 @@ import Ajv from 'ajv'
 import {toTree} from 'ajv-errors-to-data-tree'
 import {traverseTree} from 'ajv-errors-to-data-tree/src/helpers.js'
 
-import * as m from 'bazar-api/app/src/messages.js'
+import * as m from 'bazar-api/src/messages.js'
+
+import {_parseFirstOneOfItemPath} from './helpers.js'
 
 const ajv = new Ajv({allErrors: true, strictRequired: true})
 
@@ -50,12 +52,12 @@ function filterErrors(errors) {
     const isInSaleErr = errors.node.isInSale?.errors.find(e => 'required' === e.data.keyword || 'type' === e.data.keyword)
 
     if (isInSaleErr) {
-        traverseTree(errors, (e) => {
-            // 1.1, 1.2 in Filtering out irrelevant errors
-            if (_parseFirstOneOfItemPath(isInSaleErr.data.schemaPath) === _parseFirstOneOfItemPath(e.data.schemaPath) || 'required' === e.data.keyword) return null
+        traverseTree(errors, (e, fieldname) => {
+            // 1.1, 1.2, 1.3 in Filtering out irrelevant errors
+            if (_parseFirstOneOfItemPath(isInSaleErr.data.schemaPath) === _parseFirstOneOfItemPath(e.data.schemaPath) || 'required' === e.data.keyword && 'isInSale' !== fieldname || 'enum' === e.data.keyword) return null
         })
 
-        throw errors
+        return
     }
 
     // 2 in Filtering out irrelevant errors
@@ -75,18 +77,60 @@ function filterErrors(errors) {
     traverseTree(errors, (e) => {
         if (redundantOneOfSchemas.includes(_parseFirstOneOfItemPath(e.data.schemaPath))) return null
     })
+
+    return
+}
+
+function validateBSON(fields) {
+    return validateObjectId(fields.itemInitial)
 }
 
 function validate(fields) {
-    if (_validate(fields)) return null
+    if (_validate(fields)) {
+        try {
+            validateBSON(fields)
+        } catch(e) {
+            if (m.ValidationError.code !== e.code) throw e
+            return {
+                errors: [],
+                node: {
+                    itemInitial: {
+                        errors: [e],
+                        node: null
+                    }
+                }
+            }
+        }
+
+        return null
+    }
 
     const errors = toTree(_validate.errors, (e) => {
+        // see Which errors should not occur in the data
+        if ('additionalProperties' === e.data.keyword) throw new Error("data contains fields, not defined in the spec")
+
+        if ('required' === e.data.keyword) return m.FieldMissing.create(e.message, e.data)
+        if ('type' === e.data.keyword) {
+            const _e = new TypeError(e.data.message)
+            _e.data = e.data
+            return _e
+        }
+
         return m.ValidationError.create(e.message, e.data)
     })
 
     filterErrors(errors)
 
-    throw errors
+    if (errors.node.itemInitial?.errors.length) return errors
+
+    try {
+        validateBSON(fields)
+    } catch(e) {
+        if (m.ValidationError.code !== e.code) throw e
+        errors.node.itemInitial.errors.push(e)
+    }
+
+    return errors
 }
 
-export {validate as default, filterErrors}
+export {validate, filterErrors, _validate}
