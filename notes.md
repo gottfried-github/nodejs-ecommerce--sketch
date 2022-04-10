@@ -2,6 +2,9 @@
 ## Criteria
 See `'Additional conditions' in 'Structure/Product' in e-shop docs` for what the validation should implement.
 
+## Which errors should not occur in the data
+`bazar-api` is expected to pass only the fields, defined in the specification. If any other fields are present, then we should throw (like we would, for example, if data of wrong type is passed to a function in a program).
+
 ## Which errors to report
 Consider the case: `{
     isInSale: 5,
@@ -19,8 +22,8 @@ To sidestep this I can use an independent jsonschema validation lib like `ajv` t
 `1.` is not an issue in the case of the `oneOf` keyword, since the keyword's definition hasn't changed between the two standards.
 `2.` the solution is to manually validate the appropriate fields, using the `bson` library.
 
-## Machine-readable errors with ajv
-### Some problems
+### Machine-readable errors with ajv
+#### Some problems
 When data violates one of the schemas in `oneOf`, errors for every schema are generated (see `~/basement/house/test/ajv_oneOf` readme).
 Let's consider the case of the product schema.
 1. case data: `{}`, `{isInSale: 5}` (see `empty` and `invalid`). Both these data will have:
@@ -32,7 +35,7 @@ We've established, in `'Which errors to report'`, that in a case like this, we d
 
 3. `{isInSale: true, name: 5}`. This will have a `required` error for `itemInitial`.
 
-### Some observations
+#### Some observations
 Both schemas are identical except of:
     1. the value of the `enum` keyword for `isInSale`; and
     2. the `name` and `itemInitial` fields being `required`
@@ -41,15 +44,12 @@ So, whenever an error occurs, there will be identical errors for each of the sch
     1. there will be no `required` errors for `name` and `itemInitial` (because of `2` from above) from the second schema and,
     2. if `isInSale` satisfies one of the schemas, there will be no `enum` error for that schema (because of `1` from above).
 
-### Filtering out irrelevant errors
+#### Filtering out irrelevant errors
 1. In case if `isInSale` is invalid or missing: the `required` errors for the other fields are irrelevant - see `'Which errors to report'`; all the other errors will be identical for each of the schemas -- so we can
     1. ignore the `required` errors for the other fields and
     2. arbitrarily pick any schema and ignore errors from all the other ones
     3. additionally, we can ignore `enum` errors for `isInSale` (which is the only field these errors are possible for), because that keyword is used to make a logical distinction, based on which to choose schema, not to actually specify allowed values
 2. If `isInSale` satisfies one of the schemas, then the schema which doesn't have the `enum` error for `isInSale` is the appropriate schema.
-
-## Which errors should not occur in the data
-`bazar-api` is expected to pass only the fields, defined in the specification. If any other fields are present, then we should throw (like we would, for example, if data of wrong type is passed to a function in a program).
 
 # Setup
 ## The role of `migrate-mongo` in this project
