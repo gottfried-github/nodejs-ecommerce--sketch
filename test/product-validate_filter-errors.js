@@ -76,15 +76,23 @@ function testFilterErrors() {
             )
         })
     })
-    //
-    // describe("true isInSale, invalid field", () => {
-    //     _validate({isInSale: true, name: 5})
-    //     const tree = toTree(_validate.errors)
-    //
-    //     it("contains two errors: a 'type' error for name and a 'required' error for itemInitial", () => {
-    //         filterErrors(tree)
-    //     })
-    // })
+
+    describe("true isInSale, invalid field", () => {
+        _validate({isInSale: true, name: 5})
+        const tree = toTree(_validate.errors)
+
+        it("contains two errors: a 'type' error for name and a 'required' error for itemInitial", () => {
+            filterErrors(tree)
+
+            const keys = Object.keys(tree.node)
+            assert(
+                2 === keys.length && keys.includes('name') && keys.includes('itemInitial')
+
+                && 1 === tree.node.name.errors.length && 'type' === tree.node.name.errors[0].data.keyword
+                && 1 === tree.node.itemInitial.errors.length && 'required' === tree.node.itemInitial.errors[0].data.keyword
+            )
+        })
+    })
 }
 
 export {testFilterErrors}
