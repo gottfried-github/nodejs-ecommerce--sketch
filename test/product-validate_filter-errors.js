@@ -40,21 +40,42 @@ function testFilterErrors() {
         })
     })
 
-    // describe("one invalid field and: 1. missing isInSale; 2. invalid isInSale. Contains two errors:", () => {
-    //     _validate({name: 5})
-    //     const missing =  toTree(_validate.errors)
-    //
-    //     _validate({isInSale: 5, name: 5})
-    //     const invalid =  toTree(_validate.errors)
-    //
-    //     it("1. a 'required' error for isInSale and 'type' error for name", () => {
-    //         filterErrors(missing)
-    //     })
-    //
-    //     it("2. a 'type' error for isInSale and 'type' error for name", () => {
-    //         filterErrors(invalid)
-    //     })
-    // })
+    describe("one invalid field and: 1. missing isInSale; 2. invalid isInSale. Contains two errors:", () => {
+        _validate({name: 5})
+        const missing =  toTree(_validate.errors)
+
+        _validate({isInSale: 5, name: 5})
+        const invalid =  toTree(_validate.errors)
+
+        it("1. a 'required' error for isInSale and 'type' error for name", () => {
+            filterErrors(missing)
+            // console.log("testFilterErrors, one invalid field, missing, filtered errors - missing:", missing.node);
+
+            const keys = Object.keys(missing.node)
+            assert(
+                // tree.node only includes the two fields
+                2 === keys.length && keys.includes('isInSale') && keys.includes('name')
+
+                // each of the fields have one proper error
+                && 1 === missing.node.isInSale.errors.length && 'required' === missing.node.isInSale.errors[0].data.keyword
+                && 1 === missing.node.name.errors.length && 'type' === missing.node.name.errors[0].data.keyword
+            )
+        })
+
+        it("2. a 'type' error for isInSale and 'type' error for name", () => {
+            filterErrors(invalid)
+
+            const keys = Object.keys(invalid.node)
+            assert(
+                // tree.node only includes the two fields
+                2 === keys.length && keys.includes('isInSale') && keys.includes('name')
+
+                // each of the fields have one proper error
+                && 1 === invalid.node.isInSale.errors.length && 'type' === invalid.node.isInSale.errors[0].data.keyword
+                && 1 === invalid.node.name.errors.length && 'type' === invalid.node.name.errors[0].data.keyword
+            )
+        })
+    })
     //
     // describe("true isInSale, invalid field", () => {
     //     _validate({isInSale: true, name: 5})
