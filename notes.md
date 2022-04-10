@@ -66,3 +66,6 @@ If we've tested the dependencies, we don't need to inject fake ones to test `val
     3. if data includes fields, not defined in the spec, it throws an error
 
 But mainly, we have to make sure that it returns proper errors for data, violating a mixture of JSON and BSON rules.
+
+# `_product-validate`, testing `_validateBSON`
+The method is private, it's meant to be used by `validate`, which JSON-validate the data before passing it to the method. Henceforth, I only provide cases involving `itemInitial`. I compare the returned error (if any) with an error, generated for the same input by `mongodb` `ObjectId`.

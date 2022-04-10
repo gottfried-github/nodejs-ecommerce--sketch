@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 
 import {toTree} from 'ajv-errors-to-data-tree'
-import {validate, filterErrors, _validate} from '../src/_product-validate.js'
+import {filterErrors, _validate} from '../src/_product-validate.js'
 
 function testFilterErrors() {
     describe("no fields and: 1. missing isInSale; 2. invalid isInSale. Contains a single error:", () => {
