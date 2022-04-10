@@ -58,3 +58,11 @@ I only use the `create` command to create migration files. This doesn't seem to 
 # References
 ## Behavior of the schema, defined in the `20220409125303-product-schema.js`
 See `~/basement/house/test/bazar-product-schema-mongodb` for examples of behavior for different data.
+
+# `_product-validate`, testing `validate`
+If we've tested the dependencies, we don't need to inject fake ones to test `validate`: we just need to make sure that:
+    1. if data violates JSON rules, it returns errors, that pass the same tests as errors, returned by `filterErrors` do
+    2. if data violates BSON rules, the corresponding errors are the same as `validateBSON` would return
+    3. if data includes fields, not defined in the spec, it throws an error
+
+But mainly, we have to make sure that it returns proper errors for data, violating a mixture of JSON and BSON rules.
