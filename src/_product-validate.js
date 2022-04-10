@@ -55,7 +55,7 @@ function filterErrors(errors) {
             if (_parseFirstOneOfItemPath(isInSaleErr.data.schemaPath) === _parseFirstOneOfItemPath(e.data.schemaPath) || 'required' === e.data.keyword) return null
         })
 
-        throw errors
+        return
     }
 
     // 2 in Filtering out irrelevant errors
@@ -75,10 +75,12 @@ function filterErrors(errors) {
     traverseTree(errors, (e) => {
         if (redundantOneOfSchemas.includes(_parseFirstOneOfItemPath(e.data.schemaPath))) return null
     })
+
+    return
 }
 
 function validateBSON(fields) {
-    validateObjectId(fields.itemInitial)
+    return validateObjectId(fields.itemInitial)
 }
 
 function validate(fields) {
@@ -87,7 +89,7 @@ function validate(fields) {
             validateBSON(fields)
         } catch(e) {
             if (m.ValidationError.code !== e.code) throw e
-            throw {
+            return {
                 errors: [],
                 node: {
                     itemInitial: {
@@ -97,6 +99,8 @@ function validate(fields) {
                 }
             }
         }
+
+        return null
     }
 
     const errors = toTree(_validate.errors, (e) => {
@@ -105,7 +109,7 @@ function validate(fields) {
 
     filterErrors(errors)
 
-    if (errors.node.itemInitial?.errors.length) throw errors
+    if (errors.node.itemInitial?.errors.length) return errors
 
     try {
         validateBSON(fields)
@@ -114,7 +118,7 @@ function validate(fields) {
         errors.node.itemInitial.errors.push(e)
     }
 
-    throw errors
+    return errors
 }
 
 export {validate as default, filterErrors}
