@@ -53,8 +53,8 @@ function filterErrors(errors) {
 
     if (isInSaleErr) {
         traverseTree(errors, (e, fieldname) => {
-            // 1.1, 1.2 in Filtering out irrelevant errors
-            if (_parseFirstOneOfItemPath(isInSaleErr.data.schemaPath) === _parseFirstOneOfItemPath(e.data.schemaPath) || 'required' === e.data.keyword && 'isInSale' !== fieldname) return null
+            // 1.1, 1.2, 1.3 in Filtering out irrelevant errors
+            if (_parseFirstOneOfItemPath(isInSaleErr.data.schemaPath) === _parseFirstOneOfItemPath(e.data.schemaPath) || 'required' === e.data.keyword && 'isInSale' !== fieldname || 'enum' === e.data.keyword) return null
         })
 
         return

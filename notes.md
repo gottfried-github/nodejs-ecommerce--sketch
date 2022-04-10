@@ -44,7 +44,8 @@ So, whenever an error occurs, there will be identical errors for each of the sch
 ### Filtering out irrelevant errors
 1. In case if `isInSale` is invalid or missing: the `required` errors for the other fields are irrelevant - see `'Which errors to report'`; all the other errors will be identical for each of the schemas -- so we can
     1. ignore the `required` errors for the other fields and
-    2. arbitrarily pick any schema and ignore errors from all the other ones.
+    2. arbitrarily pick any schema and ignore errors from all the other ones
+    3. additionally, we can ignore `enum` errors for `isInSale` (which is the only field these errors are possible for), because that keyword is used to make a logical distinction, based on which to choose schema, not to actually specify allowed values
 2. If `isInSale` satisfies one of the schemas, then the schema which doesn't have the `enum` error for `isInSale` is the appropriate schema.
 
 ## Which errors should not occur in the data

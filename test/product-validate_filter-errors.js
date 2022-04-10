@@ -25,9 +25,19 @@ function testFilterErrors() {
             )
         })
 
-        // it("2. a 'type' error for isInSale", () => {
-        //     filterErrors(invalid)
-        // })
+        it("2. a 'type' error for isInSale", () => {
+            filterErrors(invalid)
+
+            // console.log("testFilterErrors, no fields, missing, contains a 'required' error for isInSale, missing:", invalid.node.isInSale.errors);
+            assert(
+                // tree.node only includes isInSale;
+                1 === Object.keys(invalid.node).length && 'isInSale' in invalid.node
+
+                // tree.node.isInSale only has one error;
+                // the error keyword is 'type'
+                && 1 === invalid.node.isInSale.errors.length && 'type' === invalid.node.isInSale.errors[0].data.keyword
+            )
+        })
     })
 
     // describe("one invalid field and: 1. missing isInSale; 2. invalid isInSale. Contains two errors:", () => {
