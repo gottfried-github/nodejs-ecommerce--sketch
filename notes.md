@@ -47,6 +47,9 @@ So, whenever an error occurs, there will be identical errors for each of the sch
     2. arbitrarily pick any schema and ignore errors from all the other ones.
 2. If `isInSale` satisfies one of the schemas, then the schema which doesn't have the `enum` error for `isInSale` is the appropriate schema.
 
+## Which errors should not occur in the data
+`bazar-api` is expected to pass only the fields, defined in the specification. If any other fields are present, then we should throw (like we would, for example, if data of wrong type is passed to a function in a program). 
+
 # Setup
 ## The role of `migrate-mongo` in this project
 I only use the `create` command to create migration files. This doesn't seem to be connecting to the database, and using the `url` option in the config. So I commented it out entirely.
