@@ -6,7 +6,6 @@ import {validate, filterErrors, _validate} from '../src/_product-validate.js'
 function testFilterErrors() {
     describe("no fields and: 1. missing isInSale; 2. invalid isInSale. Contains a single error:", () => {
         _validate({})
-        // console.log("testFilterErrors, no fields, missing, _validate.errors:", _validate.errors);
         const missing = toTree(_validate.errors)
 
         _validate({isInSale: 5})

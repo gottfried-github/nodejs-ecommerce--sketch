@@ -52,9 +52,9 @@ function filterErrors(errors) {
     const isInSaleErr = errors.node.isInSale?.errors.find(e => 'required' === e.data.keyword || 'type' === e.data.keyword)
 
     if (isInSaleErr) {
-        traverseTree(errors, (e) => {
+        traverseTree(errors, (e, fieldname) => {
             // 1.1, 1.2 in Filtering out irrelevant errors
-            if (_parseFirstOneOfItemPath(isInSaleErr.data.schemaPath) === _parseFirstOneOfItemPath(e.data.schemaPath) || 'required' === e.data.keyword) return null
+            if (_parseFirstOneOfItemPath(isInSaleErr.data.schemaPath) === _parseFirstOneOfItemPath(e.data.schemaPath) || 'required' === e.data.keyword && 'isInSale' !== fieldname) return null
         })
 
         return
