@@ -2,7 +2,9 @@ import Ajv from 'ajv'
 import {toTree} from 'ajv-errors-to-data-tree'
 import {traverseTree} from 'ajv-errors-to-data-tree/src/helpers.js'
 
-import * as m from 'bazar-api/app/src/messages.js'
+import * as m from 'bazar-api/src/messages.js'
+
+import {_parseFirstOneOfItemPath} from './helpers.js'
 
 const ajv = new Ajv({allErrors: true, strictRequired: true})
 
@@ -131,4 +133,4 @@ function validate(fields) {
     return errors
 }
 
-export {validate as default, filterErrors, _validate}
+export {validate, filterErrors, _validate}
