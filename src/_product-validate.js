@@ -110,14 +110,15 @@ function validate(fields) {
         // see Which errors should not occur in the data
         if ('additionalProperties' === e.data.keyword) throw new Error("data contains fields, not defined in the spec")
 
-        if ('required' === e.data.keyword) return m.FieldMissing.create(e.message, e.data)
-        if ('type' === e.data.keyword) {
-            const _e = new TypeError(e.data.message)
-            _e.data = e.data
-            return _e
-        }
-
-        return m.ValidationError.create(e.message, e.data)
+        return e
+        // if ('required' === e.data.keyword) return m.FieldMissing.create(e.message, e.data)
+        // if ('type' === e.data.keyword) {
+        //     const _e = new TypeError(e.data.message)
+        //     _e.data = e.data
+        //     return _e
+        // }
+        //
+        // return m.ValidationError.create(e.message, e.data)
     })
 
     filterErrors(errors)
