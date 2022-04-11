@@ -103,14 +103,16 @@ function _validateBSON(fields) {
 
 function validate(fields) {
     if (_validate(fields)) {
-        return validateBSON(fields)
+        return _validateBSON(fields)
     }
 
     const errors = toTree(_validate.errors, (e) => {
-        // see Which errors should not occur in the data
-        if ('additionalProperties' === e.data.keyword) throw new Error("data contains fields, not defined in the spec")
+        console.log("toTree, cb - e:", e);
 
-        return e
+        // see Which errors should not occur in the data
+        if ('additionalProperties' === e.keyword) throw new Error("data contains fields, not defined in the spec")
+
+        return {message: e.message, data: e}
         // if ('required' === e.data.keyword) return m.FieldMissing.create(e.message, e.data)
         // if ('type' === e.data.keyword) {
         //     const _e = new TypeError(e.data.message)
@@ -125,7 +127,7 @@ function validate(fields) {
 
     if (errors.node.itemInitial) return errors
 
-    const bsonErrors = validateBSON(fields)
+    const bsonErrors = _validateBSON(fields)
     if (bsonErrors) {
         errors.node.itemInitial = {
             errors: [m.ValidationError.create(bsonErrors.node.itemInitial.errors[0].message, bsonErrors.node.itemInitial.errors[0].message)],
