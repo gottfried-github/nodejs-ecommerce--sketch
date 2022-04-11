@@ -42,6 +42,14 @@ function bsonValidateData(validate) {
             assert.strictEqual(validate(fields), null)
         })
     })
+
+    describe("itemInitial is not set", () => {
+        const fields = {}
+
+        it("returns null", () => {
+            assert.strictEqual(validate(fields), null)
+        })
+    })
 }
 
 export {bsonValidateData}
