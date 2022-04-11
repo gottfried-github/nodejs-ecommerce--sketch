@@ -69,3 +69,8 @@ But mainly, we have to make sure that it returns proper errors for data, violati
 
 # `_product-validate`, testing `_validateBSON`
 The method is private, it's meant to be used by `validate`, which JSON-validate the data before passing it to the method. Henceforth, I only provide cases involving `itemInitial`. I compare the returned error (if any) with an error, generated for the same input by `mongodb` `ObjectId`.
+
+# `_product-validate`, `_validateBSON`: handle non-existing `itemInitial`
+In `validate`, I don't check whether `itemInitial` is present in the fields before passing them to `_validateBSON`, because which fields should be validated against BSON is not the concern of `validate`: it's the concern of `_validateBSON`. Henceforth, `_validateBSON` should handle it itself. Before it handled it implicitly, because `ObjectId` just generates a new id if passed `undefined` or `null`. But handling it explicitly makes the code a bit more accessible.
+## What if `itemInitial` is set, but is `null` or `undefined`?
+Again, `ObjectId` simply generates a new id if passed either of those - hence generating no error. But for the case that `_validateBSON` is designed for this is not appropriate: `itemInitial` must be an existing value, that should be a valid `objectId`. But, `_validateBSON` is a private method, used only by `validate`, which makes sure that `itemInitial`, if any, is a string, before passing the fields to `_validateBSON`.

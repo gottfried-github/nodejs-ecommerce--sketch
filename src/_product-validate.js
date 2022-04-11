@@ -84,6 +84,8 @@ function filterErrors(errors) {
 }
 
 function _validateBSON(fields) {
+    if (!('itemInitial' in fields)) return null
+
     try {
         new ObjectId(fields.itemInitial)
     } catch(e) {
