@@ -122,7 +122,7 @@ function validate(fields) {
 
     filterErrors(errors)
 
-    if (errors.node.itemInitial?.errors.length) return errors
+    if (errors.node.itemInitial) return errors
 
     const bsonErrors = validateBSON(fields)
     if (bsonErrors) {
