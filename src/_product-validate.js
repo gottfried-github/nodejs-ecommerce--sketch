@@ -132,7 +132,7 @@ function validate(fields) {
     const bsonErrors = _validateBSON(fields)
     if (bsonErrors) {
         errors.node.itemInitial = {
-            errors: [m.ValidationError.create(bsonErrors.node.itemInitial.errors[0].message, bsonErrors.node.itemInitial.errors[0].message)],
+            errors: [m.ValidationError.create(bsonErrors.node.itemInitial.errors[0].message, bsonErrors.node.itemInitial.errors[0])],
             node: null,
         }
     }
