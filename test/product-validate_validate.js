@@ -41,11 +41,18 @@ const testsBSON = {
         o: validate,
         description: "JSON-valid but BSON-invalid: itemInitial is an invalid string objectId"
     }],
-    returnsNull: [{
-        i: [{isInSale: false, itemInitial: new ObjectId().toString()}],
-        o: validate,
-        description: "both JSON- and BSON-valid: itemInitial is a valid string objectId"
-    }]
+    returnsNull: [
+        {
+            i: [{isInSale: false, itemInitial: new ObjectId().toString()}],
+            o: validate,
+            description: "both JSON- and BSON-valid: itemInitial is a valid string objectId"
+        },
+        {
+            i: [{isInSale: false, itemInitial: new ObjectId()}],
+            o: validate,
+            description: "itemInitial is a valid ObjectId objectId"
+        }
+    ]
 }
 
 function testValidate() {

@@ -14,9 +14,7 @@ const otherProps = {
     name: {
         type: "string"
     },
-    itemInitial: {
-        type: "string"
-    }
+    itemInitial: {}
 }
 
 const schema = {
