@@ -109,7 +109,7 @@ function validate(fields) {
     }
 
     const errors = toTree(_validate.errors, (e) => {
-        console.log("toTree, cb - e:", e);
+        // console.log("toTree, cb - e:", e);
 
         // see Which errors should not occur in the data
         if ('additionalProperties' === e.keyword) throw new Error("data contains fields, not defined in the spec")
