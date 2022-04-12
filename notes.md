@@ -77,6 +77,9 @@ If we've tested the dependencies, we don't need to inject fake ones to test `val
 
 But mainly, we have to make sure that it returns proper errors for data, violating a mixture of JSON and BSON rules.
 
+# `_product-validate`, testing `validate`: second take
+`validate` is essentially a controller more than it is a validation function. So it might be that it would make more sense to test whether it calls appropriate functions in appropriate cases, rather than test whether it performs correct data validation.
+
 # `_product-validate`, testing `_validateBSON`
 The method is private, it's meant to be used by `validate`, which JSON-validate the data before passing it to the method. Henceforth, I only provide cases involving `itemInitial`. I compare the returned error (if any) with an error, generated for the same input by `mongodb` `ObjectId`.
 
