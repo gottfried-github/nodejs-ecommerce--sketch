@@ -18,16 +18,16 @@ function _parseFirstOneOfItemPath(schemaPath) {
     return oneOfPath
 }
 
-function validateObjectId(id, {m, ObjectId}) {
-    try {
-        id = new ObjectId(id)
-    } catch (e) {
-        if (!(e instanceof BSONTypeError)) throw e
+// function validateObjectId(id, {ObjectId}) {
+//     try {
+//         id = new ObjectId(id)
+//     } catch (e) {
+//         if (!(e instanceof BSONTypeError)) throw e
+//
+//         return m.ValidationError.create("'id' must be a valid ObjectId", e)
+//     }
+//
+//     return null
+// }
 
-        return m.ValidationError.create("'id' must be a valid ObjectId", e)
-    }
-
-    return null
-}
-
-export {_parseFirstOneOfItemPath, validateObjectId}
+export {_parseFirstOneOfItemPath}

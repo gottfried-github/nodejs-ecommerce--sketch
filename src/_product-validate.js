@@ -1,4 +1,6 @@
 import Ajv from 'ajv'
+import {ObjectId} from 'mongodb'
+
 import {toTree} from 'ajv-errors-to-data-tree'
 import {traverseTree} from 'ajv-errors-to-data-tree/src/helpers.js'
 
@@ -81,56 +83,61 @@ function filterErrors(errors) {
     return
 }
 
-function validateBSON(fields) {
-    return validateObjectId(fields.itemInitial)
+function _validateBSON(fields) {
+    if (!('itemInitial' in fields)) return null
+
+    try {
+        new ObjectId(fields.itemInitial)
+    } catch(e) {
+        return {
+            errors: [],
+            node: {
+                itemInitial: {
+                    errors: [e],
+                    node: null
+                }
+            }
+        }
+    }
+
+    return null
 }
 
 function validate(fields) {
     if (_validate(fields)) {
-        try {
-            validateBSON(fields)
-        } catch(e) {
-            if (m.ValidationError.code !== e.code) throw e
-            return {
-                errors: [],
-                node: {
-                    itemInitial: {
-                        errors: [e],
-                        node: null
-                    }
-                }
-            }
-        }
-
-        return null
+        return _validateBSON(fields)
     }
 
     const errors = toTree(_validate.errors, (e) => {
+        // console.log("toTree, cb - e:", e);
+
         // see Which errors should not occur in the data
-        if ('additionalProperties' === e.data.keyword) throw new Error("data contains fields, not defined in the spec")
+        if ('additionalProperties' === e.keyword) throw new Error("data contains fields, not defined in the spec")
 
-        if ('required' === e.data.keyword) return m.FieldMissing.create(e.message, e.data)
-        if ('type' === e.data.keyword) {
-            const _e = new TypeError(e.data.message)
-            _e.data = e.data
-            return _e
-        }
-
-        return m.ValidationError.create(e.message, e.data)
+        return {message: e.message, data: e}
+        // if ('required' === e.data.keyword) return m.FieldMissing.create(e.message, e.data)
+        // if ('type' === e.data.keyword) {
+        //     const _e = new TypeError(e.data.message)
+        //     _e.data = e.data
+        //     return _e
+        // }
+        //
+        // return m.ValidationError.create(e.message, e.data)
     })
 
     filterErrors(errors)
 
-    if (errors.node.itemInitial?.errors.length) return errors
+    if (errors.node.itemInitial) return errors
 
-    try {
-        validateBSON(fields)
-    } catch(e) {
-        if (m.ValidationError.code !== e.code) throw e
-        errors.node.itemInitial.errors.push(e)
+    const bsonErrors = _validateBSON(fields)
+    if (bsonErrors) {
+        errors.node.itemInitial = {
+            errors: [m.ValidationError.create(bsonErrors.node.itemInitial.errors[0].message, bsonErrors.node.itemInitial.errors[0])],
+            node: null,
+        }
     }
 
     return errors
 }
 
-export {validate, filterErrors, _validate}
+export {validate, _validateBSON, filterErrors, _validate}
