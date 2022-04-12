@@ -1,9 +1,11 @@
 import {assert} from 'chai'
+import {ObjectId} from 'mongodb'
 
 import {jsonValidateData} from './product-validate_JSON-validate-data.js'
-import {bsonValidateData} from "./product-validate_BSON-validate-data.js"
+import {_validateBSONTests} from "./product-validate_validateBSON.js"
 
 import {validate} from "../src/_product-validate.js"
+
 
 function testValidate() {
     describe("JSON validate data", () => {
@@ -46,6 +48,39 @@ function testValidate() {
 
             it(jsonValidateData.trueInvalidField.description, () => {
                 jsonValidateData.trueInvalidField.assert(tree)
+            })
+        })
+    })
+
+    describe("JSON-valid but BSON-invalid", () => {
+        const fields = {isInSale: false, itemInitial: "an invalid id"}
+        const errors = validate(fields)
+
+        it(_validateBSONTests.invalid.tests.truthy.description, () => {
+            _validateBSONTests.invalid.tests.truthy.assert(errors)
+        })
+
+        it(_validateBSONTests.invalid.tests.singleErrorOfItemInitial.description, () => {
+            _validateBSONTests.invalid.tests.singleErrorOfItemInitial.assert(errors)
+        })
+
+        it(_validateBSONTests.invalid.tests.correctError.description, () => {
+            _validateBSONTests.invalid.tests.correctError.assert(errors)
+        })
+
+        describe("itemInitial is a valid string objectId", () => {
+            const fields = {isInSale: false, itemInitial: new ObjectId()}
+            const errors = validate(fields)
+            // console.log()
+
+            it(_validateBSONTests.valid.description, () => {
+                _validateBSONTests.valid.assert(errors)
+            })
+        })
+
+        describe("itemInitial is not set", () => {
+            it(_validateBSONTests.notSet.description, () => {
+                _validateBSONTests.notSet.assert(_validateBSON(_validateBSONTests.notSet.data))
             })
         })
     })
