@@ -42,7 +42,7 @@ function testBSONErrors(tests) {
     tests.returnsNull.forEach(t => {
         describe(t.description || '', () => {
             it("returns null", () => {
-                assert.strictEqual(t.o(t.i), null)
+                assert.strictEqual(t.o(...t.i), null)
             })
         })
     })
