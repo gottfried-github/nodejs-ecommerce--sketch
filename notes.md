@@ -61,6 +61,7 @@ See `~/basement/house/test/bazar-product-schema-mongodb` for examples of behavio
 
 # Testing output separately from input
 Tests are first and foremost about the *output* of a component, not necessarily about it's *input*: there could be different components taking different input and generating the same output and the output of all such components should be validated against the same code.
+Of course, a concrete component has to be tested to generate specific outputs for specific inputs.
 ## Example
 For a certain input data, both `validate` and `_validateBSON` should return a single error - a BSONTypeError - regarding `itemInitial`. But the former should return it for `{isInSale: false, itemInitial: "an invalid id"}` or alike - while the latter will return it for, say `{itemInitial: "an invalid id"}`. In both cases the output is the same, but the input is different.
 Right now, `validate` doesn't pass the last two tests from `JSON-valid but BSON-invalid` because the data passed in is actually not JSON-valid.
