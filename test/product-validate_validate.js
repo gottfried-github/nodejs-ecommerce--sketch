@@ -1,6 +1,7 @@
 import {assert} from 'chai'
 import {ObjectId} from 'mongodb'
 import {BSONTypeError} from 'bson'
+import {isValidBadInputTree} from 'bazar-api/src/helpers.js'
 
 import {testBSONErrors} from './product-validate_testBSONErrors.js'
 import {testJSONErrors} from './product-validate_testJSONErrors.js'
@@ -94,6 +95,13 @@ function testValidate() {
     describe("data contains fields, not defined in the spec", () => {
         it("throws an appropriate error", () => {
             assert.throws(() => {validate({isInSale: false, irrelevantProperty: true})}, Error, "data contains fields, not defined in the spec")
+        })
+    })
+
+    describe("valid data", () => {
+        it("returns valid bad input errors", () => {
+            const errors = validate({isInSale: true, name: 5})
+            assert.strictEqual(isValidBadInputTree(errors), true)
         })
     })
 }
