@@ -100,7 +100,7 @@ function testValidate() {
 
     describe("valid data", () => {
         it("returns valid bad input errors", () => {
-            const errors = validate({isInSale: true, name: 5})
+            const errors = validate({isInSale: true, itemInitial: "an invalid id"})
             assert.strictEqual(isValidBadInputTree(errors), true)
         })
     })
