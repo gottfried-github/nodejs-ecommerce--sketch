@@ -1,6 +1,7 @@
 import {assert} from 'chai'
 import {ObjectId} from 'mongodb'
 import {BSONTypeError} from 'bson'
+import {isValidBadInputTree} from 'bazar-api/src/helpers.js'
 
 import {testBSONErrors} from './product-validate_testBSONErrors.js'
 import {testJSONErrors} from './product-validate_testJSONErrors.js'
@@ -11,27 +12,27 @@ const testsJSON = {
     isInSaleRequired: [{
         i: [{}],
         o: validate,
-        description: "isInSale missing and no fields"
+        description: "missing isInSale and no fields"
     }],
     isInSaleType: [{
         i: [{isInSale: 5}],
         o: validate,
-        description: "isInSale invalid and no fields"
+        description: "invalid isInSale and no fields"
     }],
     isInSaleRequiredNameType: [{
         i: [{name: 5}],
         o: validate,
-        description: "isInSale missing and name invalid"
+        description: "missing isInSale and invalid name: shouldn't contain 'required' error for itemInitial - see Which errors to report"
     }],
     isInSaleNameType: [{
         i: [{isInSale: 5, name: 5}],
         o: validate,
-        description: "isInSale invalid and name invalid"
+        description: "invalid isInSale and invalid name: shouldn't contain 'required' error for itemInitial - see Which errors to report"
     }],
     nameTypeItemInitialRequired: [{
         i: [{isInSale: true, name: 5}],
         o: validate,
-        description: "isInSale true and name invalid"
+        description: "true isInSale and invalid name: should contain 'required' error for itemInitial - the case is implied in Which errors to report"
     }],
 }
 
@@ -41,11 +42,18 @@ const testsBSON = {
         o: validate,
         description: "JSON-valid but BSON-invalid: itemInitial is an invalid string objectId"
     }],
-    returnsNull: [{
-        i: [{isInSale: false, itemInitial: new ObjectId().toString()}],
-        o: validate,
-        description: "both JSON- and BSON-valid: itemInitial is a valid string objectId"
-    }]
+    returnsNull: [
+        {
+            i: [{isInSale: false, itemInitial: new ObjectId().toString()}],
+            o: validate,
+            description: "both JSON- and BSON-valid: itemInitial is a valid string objectId"
+        },
+        {
+            i: [{isInSale: false, itemInitial: new ObjectId()}],
+            o: validate,
+            description: "itemInitial is a valid ObjectId objectId"
+        }
+    ]
 }
 
 function testValidate() {
@@ -81,6 +89,19 @@ function testValidate() {
                     )
                 }
             }))
+        })
+    })
+
+    describe("data contains fields, not defined in the spec (see Which errors should not occur in the data)", () => {
+        it("throws an appropriate error", () => {
+            assert.throws(() => {validate({isInSale: false, irrelevantProperty: true})}, Error, "data contains fields, not defined in the spec")
+        })
+    })
+
+    describe("valid data", () => {
+        it("returns valid bad input errors", () => {
+            const errors = validate({isInSale: true, name: 5})
+            assert.strictEqual(isValidBadInputTree(errors), true)
         })
     })
 }

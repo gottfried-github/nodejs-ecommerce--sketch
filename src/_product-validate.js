@@ -14,9 +14,7 @@ const otherProps = {
     name: {
         type: "string"
     },
-    itemInitial: {
-        type: "string"
-    }
+    itemInitial: {}
 }
 
 const schema = {
@@ -31,7 +29,8 @@ const schema = {
                 name: otherProps.name,
                 itemInitial: otherProps.itemInitial,
             },
-            required: ["isInSale", "name", "itemInitial"]
+            required: ["isInSale", "name", "itemInitial"],
+            additionalProperties: false
         },
         {
             type: "object",
@@ -43,7 +42,8 @@ const schema = {
                 name: otherProps.name,
                 itemInitial: otherProps.itemInitial,
             },
-            required: ["isInSale"]
+            required: ["isInSale"],
+            additionalProperties: false
         }
     ]
 }
@@ -114,15 +114,10 @@ function validate(fields) {
         // see Which errors should not occur in the data
         if ('additionalProperties' === e.keyword) throw new Error("data contains fields, not defined in the spec")
 
-        return {message: e.message, data: e}
-        // if ('required' === e.data.keyword) return m.FieldMissing.create(e.message, e.data)
-        // if ('type' === e.data.keyword) {
-        //     const _e = new TypeError(e.data.message)
-        //     _e.data = e.data
-        //     return _e
-        // }
-        //
-        // return m.ValidationError.create(e.message, e.data)
+        if ('required' === e.keyword) return m.FieldMissing.create(e.message, e)
+        if ('type' === e.keyword) return m.TypeErrorMsg.create(e.message, e)
+
+        return m.ValidationError.create(e.message, e)
     })
 
     filterErrors(errors)
@@ -140,4 +135,8 @@ function validate(fields) {
     return errors
 }
 
-export {validate, _validateBSON, filterErrors, _validate}
+export {
+    validate,
+    _validateBSON,
+    filterErrors, _validate
+}

@@ -51,6 +51,9 @@ So, whenever an error occurs, there will be identical errors for each of the sch
     3. additionally, we can ignore `enum` errors for `isInSale` (which is the only field these errors are possible for), because that keyword is used to make a logical distinction, based on which to choose schema, not to actually specify allowed values
 2. If `isInSale` satisfies one of the schemas, then the schema which doesn't have the `enum` error for `isInSale` is the appropriate schema.
 
+## Type-validating `itemInitial` in `_validate`
+An `objecId` can actually be not only a string. For example, if I pass to `validate` an `itemInitial` of an instance of `ObjectId`, it will return a type error. The same will happen for any of the other types, acceptable by `ObjectId`. To avoid this, I should not set the `string` type restriction.
+
 # Setup
 ## The role of `migrate-mongo` in this project
 I only use the `create` command to create migration files. This doesn't seem to be connecting to the database, and using the `url` option in the config. So I commented it out entirely.
@@ -73,6 +76,9 @@ If we've tested the dependencies, we don't need to inject fake ones to test `val
     3. if data includes fields, not defined in the spec, it throws an error
 
 But mainly, we have to make sure that it returns proper errors for data, violating a mixture of JSON and BSON rules.
+
+# `_product-validate`, testing `validate`: second take
+`validate` is essentially a controller more than it is a validation function. So it might be that it would make more sense to test whether it calls appropriate functions in appropriate cases, rather than test whether it performs correct data validation.
 
 # `_product-validate`, testing `_validateBSON`
 The method is private, it's meant to be used by `validate`, which JSON-validate the data before passing it to the method. Henceforth, I only provide cases involving `itemInitial`. I compare the returned error (if any) with an error, generated for the same input by `mongodb` `ObjectId`.
