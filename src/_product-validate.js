@@ -29,7 +29,8 @@ const schema = {
                 name: otherProps.name,
                 itemInitial: otherProps.itemInitial,
             },
-            required: ["isInSale", "name", "itemInitial"]
+            required: ["isInSale", "name", "itemInitial"],
+            additionalProperties: false
         },
         {
             type: "object",
@@ -41,7 +42,8 @@ const schema = {
                 name: otherProps.name,
                 itemInitial: otherProps.itemInitial,
             },
-            required: ["isInSale"]
+            required: ["isInSale"],
+            additionalProperties: false
         }
     ]
 }

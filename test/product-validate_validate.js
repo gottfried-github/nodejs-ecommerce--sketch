@@ -90,6 +90,12 @@ function testValidate() {
             }))
         })
     })
+
+    describe("data contains fields, not defined in the spec", () => {
+        it("throws an appropriate error", () => {
+            assert.throws(() => {validate({isInSale: false, irrelevantProperty: true})}, Error, "data contains fields, not defined in the spec")
+        })
+    })
 }
 
 export {testValidate}
