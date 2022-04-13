@@ -1,12 +1,15 @@
 import * as m from 'bazar-api/app/src/messages.js'
 
+class InvalidId extends Errors {constructor(...args) {super(...args)}}
+class InvalidData extends Errors {constructor(...args) {super(...args)}}
+
 async function storeCreate(fields, {c}) {
     let writeRes = null
 
     try {
         writeRes = await c.insertOne(fields)
     } catch(e) {
-        if (121 === e.code) e = m.ValidationError.create(e.message, e)
+        if (121 === e.code) e = new InvalidData()
         throw e
     }
 
@@ -21,7 +24,7 @@ async function storeUpdate(id, fields, {c}) {
     try {
         res = await c.updateOne({_id: id}, {$set: fields})
     } catch(e) {
-        if (121 === e.code) e = m.ValidationError.create(e.message, e)
+        if (121 === e.code) e = new InvalidData()
         throw e
     }
 
@@ -43,7 +46,7 @@ async function create(fields, {create, validate}) {
     try {
         await storeCreate(fields)
     } catch(e) {
-        if (m.ValidationError.code !== e.code) throw e
+        if (!(e instanceof InvalidData)) throw e
 
         const errors = validate(fields)
 
@@ -65,7 +68,7 @@ async function update(id, fields, {update, validate}) {
         res = await update(id, fields)
     } catch (e) {
         // 121 is validation error: erroneous response example in https://www.mongodb.com/docs/manual/core/schema-validation/#existing-documents
-        if (m.ValidationError.code !== e.code) throw e
+        if (!(e instanceof InvalidData)) throw e
 
         // do additional validation only if builtin validation fails. See mongodb with bsonschema: is additional data validation necessary?
         const doc = await getById(id)
