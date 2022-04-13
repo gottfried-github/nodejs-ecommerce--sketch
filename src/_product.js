@@ -45,9 +45,10 @@ async function create(fields, {create, validate}) {
     } catch(e) {
         if (m.ValidationError.code !== e.code) throw e
 
-        validate(fields)
+        const errors = validate(fields)
 
-        throw new Error("mongodb validation fails while model level validation succeeds")
+        if (!errors) throw new Error("mongodb validation fails while model level validation succeeds")
+        throw errors
     }
 }
 
@@ -69,9 +70,10 @@ async function update(id, fields, {update, validate}) {
         // do additional validation only if builtin validation fails. See mongodb with bsonschema: is additional data validation necessary?
         const doc = await getById(id)
 
-        validate(Object.assign(doc, fields))
+        const errors = validate(Object.assign(doc, fields))
 
-        throw new Error("mongodb validation fails while model level validation succeeds")
+        if (!errors) throw new Error("mongodb validation fails while model level validation succeeds")
+        throw errors
     }
 }
 
