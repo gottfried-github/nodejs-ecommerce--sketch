@@ -11,6 +11,7 @@ import {_parseFirstOneOfItemPath} from './helpers.js'
 const ajv = new Ajv({allErrors: true, strictRequired: true})
 
 const otherProps = {
+    _id: {},
     name: {
         type: "string"
     },
@@ -84,21 +85,30 @@ function filterErrors(errors) {
 }
 
 function _validateBSON(fields) {
-    if (!('itemInitial' in fields)) return null
+    if (!('_id' in fields && 'itemInitial' in fields)) return null
 
-    try {
-        new ObjectId(fields.itemInitial)
-    } catch(e) {
-        return {
-            errors: [],
-            node: {
-                itemInitial: {
-                    errors: [e],
-                    node: null
-                }
-            }
+    const errors = {errors: [], node: {
+        _id: {errors: [], node: null},
+        itemInitial: {errors: [], node: null}
+    }}
+
+    if ('_id' in fields) {
+        try {
+            new ObjectId(fields._id)
+        } catch(e) {
+            errors.node._id.errors.push(e)
         }
     }
+
+    if ('itemInitial' in fields) {
+        try {
+            new ObjectId(fields.itemInitial)
+        } catch(e) {
+            errors.node.itemInitial.errors.push(e)
+        }
+    }
+
+    if (errors.node._id.errors.length || errors.node.itemInitial.errors.length) return errors
 
     return null
 }
@@ -122,13 +132,23 @@ function validate(fields) {
 
     filterErrors(errors)
 
+    // there could be a 'required' error for itemInitial; there couldn't be any error for _id
     if (errors.node.itemInitial) return errors
 
     const bsonErrors = _validateBSON(fields)
     if (bsonErrors) {
-        errors.node.itemInitial = {
-            errors: [m.ValidationError.create(bsonErrors.node.itemInitial.errors[0].message, bsonErrors.node.itemInitial.errors[0])],
-            node: null,
+        if (bsonErrors.node._id) {
+            errors.node._id = {
+                errors: [m.ValidationError.create(bsonErrors.node._id.errors[0].message, bsonErrors.node._id.errors[0])],
+                node: null,
+            }
+        }
+
+        if (bsonErrors.node.itemInitial) {
+            errors.node.itemInitial = {
+                errors: [m.ValidationError.create(bsonErrors.node.itemInitial.errors[0].message, bsonErrors.node.itemInitial.errors[0])],
+                node: null,
+            }
         }
     }
 

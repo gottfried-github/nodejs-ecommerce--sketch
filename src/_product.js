@@ -27,17 +27,10 @@ async function storeGetById(id, {c, validateObjectId, m}) {
     @param {fields, in Types} fields
 */
 async function create(fields, {create, validate}) {
-
-    // first, validate _id, if any (see 1 in Builtin and additional validation/Some solutions)
-    // if ('_id' in fields)
-
     try {
         await storeCreate(fields)
     } catch(e) {
         if (121 !== e.code) throw e
-
-        // strip away _id before passing fields (see 1 in Builtin and additional validation/Some points worth noting)
-        // if ('_id' in fields) delete fields._id
 
         validate(fields)
 
@@ -51,6 +44,7 @@ async function create(fields, {create, validate}) {
 */
 async function update(id, fields, {update, validate}) {
     // first, validate id (see update, storeGetById: whether to validate id)
+    // also, make sure that fields doesn't contain _id, because it's not allowed to change a document's id
 
     let res = null
     try {
@@ -62,11 +56,7 @@ async function update(id, fields, {update, validate}) {
         // do additional validation only if builtin validation fails. See mongodb with bsonschema: is additional data validation necessary?
         const doc = await getById(id)
 
-        // strip away the _id before passing to validate (see 1 in Builtin and additional validation/Some points worth noting)
-        const _fields = Object.assign(doc, fields)
-        delete _fields._id
-
-        validate(_fields)
+        validate(Object.assign(doc, fields))
 
         throw new Error("mongodb validation fails while model level validation succeeds")
     }

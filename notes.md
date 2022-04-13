@@ -26,6 +26,9 @@ In `mongodb` builtin jsonSchema validation, ["The error output ... should not be
 1. **1, from above:** the solution is to separately validate `_id`, if any, before calling the store.
 3. **3, from Some points worth noting:** the point is not an issue in the case of the `oneOf` keyword, since the keyword's definition hasn't changed between the two standards.
 
+## Validating _id in additional validation
+If I validate `_id`, if any, in additional validation, then the problem, described in `1` in `'Some situations, where the points become important'` goes away and I don't need the `1` solution from above.
+
 #### Machine-readable errors with ajv
 ##### Some problems
 When data violates one of the schemas in `oneOf`, errors for every schema are generated (see `~/basement/house/test/ajv_oneOf` readme).
