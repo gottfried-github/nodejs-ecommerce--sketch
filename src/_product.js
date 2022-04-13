@@ -1,7 +1,14 @@
+import {ObjectId} from 'mongodb'
+import {BSONTypeError} from 'bson'
+
 import * as m from 'bazar-api/app/src/messages.js'
 
-class InvalidId extends Errors {constructor(...args) {super(...args)}}
-class InvalidData extends Errors {constructor(...args) {super(...args)}}
+// class InvalidId extends Errors {constructor(...args) {super(...args)}}
+
+const VALIDATION_FAIL_MSG = "data validation failed"
+const CONTAINS_ID_MSG = "data contains _id: updating document _id is not allowed"
+
+class InvalidData extends Errors {constructor(message, data, ...args) {super(message, ...args); this.data = data}}
 
 async function storeCreate(fields, {c}) {
     let writeRes = null
@@ -9,7 +16,7 @@ async function storeCreate(fields, {c}) {
     try {
         writeRes = await c.insertOne(fields)
     } catch(e) {
-        if (121 === e.code) e = new InvalidData()
+        if (121 === e.code) e = new InvalidData(VALIDATION_FAIL_MSG, e)
         throw e
     }
 
@@ -20,11 +27,25 @@ async function storeCreate(fields, {c}) {
     @param {id, in Types} id
 */
 async function storeUpdate(id, fields, {c}) {
+    // see update, storeGetById: whether to validate id
+
+    if ([null, undefined].includes(id)) throw new InvalidCriterion("invalid id")
+
+    try {
+        new ObjectId(id)
+    } catch(e) {
+        throw new m.InvalidCriterion.create("invalid id")
+    }
+
+
+    // see Prohibiting updating `_id`
+    if ('_id' in fields) throw new InvalidData(CONTAINS_ID_MSG)
+
     let res = null
     try {
         res = await c.updateOne({_id: id}, {$set: fields})
     } catch(e) {
-        if (121 === e.code) e = new InvalidData()
+        if (121 === e.code) e = new InvalidData(VALIDATION_FAIL_MSG, e)
         throw e
     }
 
@@ -34,6 +55,17 @@ async function storeUpdate(id, fields, {c}) {
 }
 
 async function storeGetById(id, {c, validateObjectId, m}) {
+    // see update, storeGetById: whether to validate id
+
+    if ([null, undefined].includes(id)) throw new InvalidCriterion("invalid id")
+
+    try {
+        new ObjectId(id)
+    } catch(e) {
+        throw new m.InvalidCriterion.create("invalid id")
+    }
+
+
     const res = c.findOne({_id: id})
 
     return res
@@ -60,15 +92,14 @@ async function create(fields, {create, validate}) {
     @param {fields, in Types} fields
 */
 async function update(id, fields, {update, validate}) {
-    // first, validate id (see update, storeGetById: whether to validate id)
-    // also, make sure that fields doesn't contain _id, because it's not allowed to change a document's id
-
     let res = null
     try {
         res = await update(id, fields)
     } catch (e) {
         // 121 is validation error: erroneous response example in https://www.mongodb.com/docs/manual/core/schema-validation/#existing-documents
         if (!(e instanceof InvalidData)) throw e
+
+        if (CONTAINS_ID_MSG === e.message) throw {errors: [], node: {_id: errors: [m.FieldUnknown.create(e.message, e)], node: null}}
 
         // do additional validation only if builtin validation fails. See mongodb with bsonschema: is additional data validation necessary?
         const doc = await getById(id)
