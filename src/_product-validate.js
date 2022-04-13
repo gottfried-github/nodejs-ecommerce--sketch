@@ -135,4 +135,8 @@ function validate(fields) {
     return errors
 }
 
-export {validate, _validateBSON, filterErrors, _validate}
+export {
+    validate,
+    _validateBSON,
+    filterErrors, _validate
+}

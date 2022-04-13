@@ -12,7 +12,7 @@ function testFilterErrors() {
                 return toTree(_validate.errors)
             })({})],
             o: (errors) => {filterErrors(errors); return errors},
-            description: "isInSale missing and no fields"
+            description: "missing isInSale and no fields. See 1 in Filtering out irrelevant errors"
         }],
         isInSaleType: [{
             i: [((data) => {
@@ -20,7 +20,7 @@ function testFilterErrors() {
                 return toTree(_validate.errors)
             })({isInSale: 5})],
             o: (errors) => {filterErrors(errors); return errors},
-            description: "isInSale invalid and no fields"
+            description: "invalid isInSale and no fields. See 1 in Filtering out irrelevant errors"
         }],
         isInSaleRequiredNameType: [{
             i: [((data) => {
@@ -28,7 +28,7 @@ function testFilterErrors() {
                 return toTree(_validate.errors)
             })({name: 5})],
             o: (errors) => {filterErrors(errors); return errors},
-            description: "isInSale missing and name invalid"
+            description: "missing isInSale and invalid name. See 1 in Filtering out irrelevant errors"
         }],
         isInSaleNameType: [{
             i: [((data) => {
@@ -36,7 +36,7 @@ function testFilterErrors() {
                 return toTree(_validate.errors)
             })({isInSale: 5, name: 5})],
             o: (errors) => {filterErrors(errors); return errors},
-            description: "isInSale invalid and name invalid"
+            description: "invalid isInSale and invalid name. See 1 in Filtering out irrelevant errors"
         }],
         nameTypeItemInitialRequired: [{
             i: [((data) => {
@@ -44,7 +44,7 @@ function testFilterErrors() {
                 return toTree(_validate.errors)
             })({isInSale: true, name: 5})],
             o: (errors) => {filterErrors(errors); return errors},
-            description: "isInSale true and name invalid"
+            description: "true isInSale and invalid name. See 2 in Filtering out irrelevant errors"
         }],
     }
 

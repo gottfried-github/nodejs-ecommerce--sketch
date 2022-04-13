@@ -12,27 +12,27 @@ const testsJSON = {
     isInSaleRequired: [{
         i: [{}],
         o: validate,
-        description: "isInSale missing and no fields"
+        description: "missing isInSale and no fields"
     }],
     isInSaleType: [{
         i: [{isInSale: 5}],
         o: validate,
-        description: "isInSale invalid and no fields"
+        description: "invalid isInSale and no fields"
     }],
     isInSaleRequiredNameType: [{
         i: [{name: 5}],
         o: validate,
-        description: "isInSale missing and name invalid"
+        description: "missing isInSale and invalid name: shouldn't contain 'required' error for itemInitial - see Which errors to report"
     }],
     isInSaleNameType: [{
         i: [{isInSale: 5, name: 5}],
         o: validate,
-        description: "isInSale invalid and name invalid"
+        description: "invalid isInSale and invalid name: shouldn't contain 'required' error for itemInitial - see Which errors to report"
     }],
     nameTypeItemInitialRequired: [{
         i: [{isInSale: true, name: 5}],
         o: validate,
-        description: "isInSale true and name invalid"
+        description: "true isInSale and invalid name: should contain 'required' error for itemInitial - the case is implied in Which errors to report"
     }],
 }
 
@@ -92,7 +92,7 @@ function testValidate() {
         })
     })
 
-    describe("data contains fields, not defined in the spec", () => {
+    describe("data contains fields, not defined in the spec (see Which errors should not occur in the data)", () => {
         it("throws an appropriate error", () => {
             assert.throws(() => {validate({isInSale: false, irrelevantProperty: true})}, Error, "data contains fields, not defined in the spec")
         })
