@@ -1,3 +1,6 @@
+# Bazar-mongo
+`mongodb` storage for the `bazar` e-commerce. More concretely, this implements storage of data, defined in `Structure` in `bazar-api`.
+
 # Usage
 ## Install
 `npm install --save mongodb bazar-mongo`
