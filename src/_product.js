@@ -28,15 +28,8 @@ async function storeCreate(fields, {c}) {
 */
 async function storeUpdate(id, fields, {c}) {
     // see update, storeGetById: whether to validate id
-
-    if ([null, undefined].includes(id)) throw new InvalidCriterion("invalid id")
-
-    try {
-        new ObjectId(id)
-    } catch(e) {
-        throw new m.InvalidCriterion.create("invalid id")
-    }
-
+    const idE = validateObjectId(id)
+    if (idE) throw m.InvalidCriterion.create(idE.message, idE)
 
     // see Prohibiting updating `_id`
     if ('_id' in fields) throw new InvalidData(CONTAINS_ID_MSG)
@@ -56,18 +49,10 @@ async function storeUpdate(id, fields, {c}) {
 
 async function storeGetById(id, {c, validateObjectId, m}) {
     // see update, storeGetById: whether to validate id
-
-    if ([null, undefined].includes(id)) throw new InvalidCriterion("invalid id")
-
-    try {
-        new ObjectId(id)
-    } catch(e) {
-        throw new m.InvalidCriterion.create("invalid id")
-    }
-
+    const idE = validateObjectId(id)
+    if (idE) throw m.InvalidCriterion.create(idE.message, idE)
 
     const res = c.findOne({_id: id})
-
     return res
 }
 

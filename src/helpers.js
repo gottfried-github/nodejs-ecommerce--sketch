@@ -1,3 +1,5 @@
+import {ObjectId} from 'mongodb'
+
 function _parseFirstOneOfItemPath(schemaPath) {
     const nodeNames = schemaPath.split('/')
     if (0 === nodeNames[0].length) nodeNames.shift()
@@ -18,16 +20,16 @@ function _parseFirstOneOfItemPath(schemaPath) {
     return oneOfPath
 }
 
-// function validateObjectId(id, {ObjectId}) {
-//     try {
-//         id = new ObjectId(id)
-//     } catch (e) {
-//         if (!(e instanceof BSONTypeError)) throw e
-//
-//         return m.ValidationError.create("'id' must be a valid ObjectId", e)
-//     }
-//
-//     return null
-// }
+function validateObjectId(id) {
+    if ([null, undefined].includes(id)) return new Error(`id cannot be null or undefined`)
 
-export {_parseFirstOneOfItemPath}
+    try {
+        new ObjectId(id)
+    } catch(e) {
+        return e
+    }
+
+    return null
+}
+
+export {_parseFirstOneOfItemPath, validateObjectId}
