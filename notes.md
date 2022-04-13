@@ -14,16 +14,20 @@ If `isInSale` is invalid, the document is invalid regardless whether other field
 For the given case, should I report a `required` error on the `itemInitial`? For the field to be required, `isInSale` must be `true`. But here we don't know whether user intended it to be `true` or `false`. Thus, we don't know if `itemInitial` is ought to be `required`.
 So, if `isInSale` is invalid or missing, we should report any errors regarding the other fields, except the `required` errors.
 
-## Parsing the errors
-In `mongodb` builtin jsonSchema validation, ["The error output ... should not be relied upon in scripts."](https://docs.mongodb.com/manual/core/schema-validation/).
-To sidestep this I can use an independent jsonschema validation lib like `ajv` to generate machine-readable errors. However there are some potential pitfalls to that.
-    1. `mongodb` validation implements the `draft-4` jsonschema standard, whereas `ajv` doesn't support that, it's default standard is `draft-7`.
-    2. in `mongodb`, I actually validate against `BSON` types, not against `JSON` ones: the `BSON` types include things like `objectId`, which there's no way to validate with `ajv`.
-`1.` is not an issue in the case of the `oneOf` keyword, since the keyword's definition hasn't changed between the two standards.
-`2.` the solution is to manually validate the appropriate fields, using the `bson` library.
+## Builtin and additional validation
+In `mongodb` builtin jsonSchema validation, ["The error output ... should not be relied upon in scripts."](https://docs.mongodb.com/manual/core/schema-validation/). So if data fails builtin validation, I have to use additional validation to provide machine-readable errors.
+### Some points worth noting
+1. in additional validation, I only validate the fields, defined in `Structure` in `bazar-api` docs, which means I don't validate the `_id` field (if such is present in the data, it will throw)
+2. in additional validation, I use a JSON-, not BSON-schema validation, which means I have to additionally BSON-validate appropriate fields
+3. `mongodb` built-in validation implements `draft-4` jsonschema standard (extended to support BSON types); `ajv`, which I use in additional validation, implements `draft-7`
+#### Some situations, where the points become important
+1. **1, from above:** In `create`, if `fields` contain an invalid `_id`, the store will throw a validation error, which will prompt `create` to engage additional validation with the fields. First of all, the latter will throw, because `_id` is not a spec defined field.
+#### Some solutions
+1. **1, from above:** the solution is to separately validate `_id`, if any, before calling the store.
+3. **3, from Some points worth noting:** the point is not an issue in the case of the `oneOf` keyword, since the keyword's definition hasn't changed between the two standards.
 
-### Machine-readable errors with ajv
-#### Some problems
+#### Machine-readable errors with ajv
+##### Some problems
 When data violates one of the schemas in `oneOf`, errors for every schema are generated (see `~/basement/house/test/ajv_oneOf` readme).
 Let's consider the case of the product schema.
 1. case data: `{}`, `{isInSale: 5}` (see `empty` and `invalid`). Both these data will have:
@@ -35,7 +39,7 @@ We've established, in `'Which errors to report'`, that in a case like this, we d
 
 3. `{isInSale: true, name: 5}`. This will have a `required` error for `itemInitial`.
 
-#### Some observations
+##### Some observations
 Both schemas are identical except of:
     1. the value of the `enum` keyword for `isInSale`; and
     2. the `name` and `itemInitial` fields being `required`
@@ -44,15 +48,18 @@ So, whenever an error occurs, there will be identical errors for each of the sch
     1. there will be no `required` errors for `name` and `itemInitial` (because of `2` from above) from the second schema and,
     2. if `isInSale` satisfies one of the schemas, there will be no `enum` error for that schema (because of `1` from above).
 
-#### Filtering out irrelevant errors
+##### Filtering out irrelevant errors
 1. In case if `isInSale` is invalid or missing: the `required` errors for the other fields are irrelevant - see `'Which errors to report'`; all the other errors will be identical for each of the schemas -- so we can
     1. ignore the `required` errors for the other fields and
     2. arbitrarily pick any schema and ignore errors from all the other ones
     3. additionally, we can ignore `enum` errors for `isInSale` (which is the only field these errors are possible for), because that keyword is used to make a logical distinction, based on which to choose schema, not to actually specify allowed values
 2. If `isInSale` satisfies one of the schemas, then the schema which doesn't have the `enum` error for `isInSale` is the appropriate schema.
 
-## Type-validating `itemInitial` in `_validate`
+## Additional validation: type-validating `itemInitial` in `_validate`
 An `objecId` can actually be not only a string. For example, if I pass to `validate` an `itemInitial` of an instance of `ObjectId`, it will return a type error. The same will happen for any of the other types, acceptable by `ObjectId`. To avoid this, I should not set the `string` type restriction.
+
+## `update`, `storeGetById`: whether to validate id
+Presumably, there's no docs with `objectId`-invalid ids (because store makes sure this doesn't happen during create operation). Therefore, if I don't validate the `id`, no document will be found. In such case, an error will be thrown, stating that the document the user tries to update (in case of `update`) doesn't exist, but it won't specify the reason, which, in our case is an invalid id. Following the principle, that maximally detailed information should be provided during data validation, I conclude that I should validate the id.
 
 # Setup
 ## The role of `migrate-mongo` in this project
