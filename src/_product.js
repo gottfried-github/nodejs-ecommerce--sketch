@@ -1,7 +1,14 @@
 import * as m from 'bazar-api/app/src/messages.js'
 
 async function storeCreate(fields, {c}) {
-    writeRes = await c.insertOne(fields)
+    let writeRes = null
+
+    try {
+        writeRes = await c.insertOne(fields)
+    } catch(e) {
+        if (121 === e.code) e = m.ValidationError.create(e.message, e)
+        throw e
+    }
 
     return true
 }
@@ -10,7 +17,13 @@ async function storeCreate(fields, {c}) {
     @param {id, in Types} id
 */
 async function storeUpdate(id, fields, {c}) {
-    const res = await c.updateOne({_id: id}, {$set: fields})
+    let res = null
+    try {
+        res = await c.updateOne({_id: id}, {$set: fields})
+    } catch(e) {
+        if (121 === e.code) e = m.ValidationError.create(e.message, e)
+        throw e
+    }
 
     if (!res.matchedCount) throw m.ResourceNotFound.create("the given id didn't match any products")
 
@@ -30,7 +43,7 @@ async function create(fields, {create, validate}) {
     try {
         await storeCreate(fields)
     } catch(e) {
-        if (121 !== e.code) throw e
+        if (m.ValidationError.code !== e.code) throw e
 
         validate(fields)
 
@@ -51,7 +64,7 @@ async function update(id, fields, {update, validate}) {
         res = await update(id, fields)
     } catch (e) {
         // 121 is validation error: erroneous response example in https://www.mongodb.com/docs/manual/core/schema-validation/#existing-documents
-        if (121 !== e.code) throw e
+        if (m.ValidationError.code !== e.code) throw e
 
         // do additional validation only if builtin validation fails. See mongodb with bsonschema: is additional data validation necessary?
         const doc = await getById(id)
