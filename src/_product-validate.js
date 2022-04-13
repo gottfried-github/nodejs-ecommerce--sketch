@@ -27,8 +27,7 @@ const schema = {
                     type: "boolean",
                     enum: [true]
                 },
-                name: otherProps.name,
-                itemInitial: otherProps.itemInitial,
+                ...otherProps,
             },
             required: ["isInSale", "name", "itemInitial"],
             additionalProperties: false
@@ -40,8 +39,7 @@ const schema = {
                     type: "boolean",
                     enum: [false]
                 },
-                name: otherProps.name,
-                itemInitial: otherProps.itemInitial,
+                ...otherProps,
             },
             required: ["isInSale"],
             additionalProperties: false
@@ -85,18 +83,15 @@ function filterErrors(errors) {
 }
 
 function _validateBSON(fields) {
-    if (!('_id' in fields && 'itemInitial' in fields)) return null
+    if (!('_id' in fields) && !('itemInitial' in fields)) return null
 
-    const errors = {errors: [], node: {
-        _id: {errors: [], node: null},
-        itemInitial: {errors: [], node: null}
-    }}
+    const errors = {errors: [], node: {}}
 
     if ('_id' in fields) {
         try {
             new ObjectId(fields._id)
         } catch(e) {
-            errors.node._id.errors.push(e)
+            errors.node._id = {errors: [e], node: null}
         }
     }
 
@@ -104,11 +99,11 @@ function _validateBSON(fields) {
         try {
             new ObjectId(fields.itemInitial)
         } catch(e) {
-            errors.node.itemInitial.errors.push(e)
+            errors.node.itemInitial = {errors: [e], node: null}
         }
     }
 
-    if (errors.node._id.errors.length || errors.node.itemInitial.errors.length) return errors
+    if (errors.node._id || errors.node.itemInitial) return errors
 
     return null
 }
