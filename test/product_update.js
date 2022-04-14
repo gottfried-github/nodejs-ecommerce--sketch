@@ -4,7 +4,7 @@ import * as m from 'bazar-api/src/messages.js'
 import {_update} from '../src/_product.js'
 
 function testUpdate() {
-    describe("an id", () => {
+    describe("is passed an id", () => {
         it("passes the 'id' argument to validateObjectId", async () => {
             const id = "an id"
             let isEqual = null
