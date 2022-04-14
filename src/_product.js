@@ -3,11 +3,7 @@ import {BSONTypeError} from 'bson'
 
 import * as m from 'bazar-api/app/src/messages.js'
 
-// class InvalidId extends Errors {constructor(...args) {super(...args)}}
-
 const VALIDATION_FAIL_MSG = "data validation failed"
-const CONTAINS_ID_MSG = "data contains _id: updating document _id is not allowed"
-
 class InvalidData extends Errors {constructor(message, data, ...args) {super(message, ...args); this.data = data}}
 
 async function _storeCreate(fields, {c}) {
