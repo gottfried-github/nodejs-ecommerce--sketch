@@ -1,10 +1,10 @@
 import {ObjectId} from 'mongodb'
 import {BSONTypeError} from 'bson'
 
-import * as m from 'bazar-api/app/src/messages.js'
+import * as m from 'bazar-api/src/messages.js'
 
 const VALIDATION_FAIL_MSG = "data validation failed"
-class InvalidData extends Errors {constructor(message, data, ...args) {super(message, ...args); this.data = data}}
+class InvalidData extends Error {constructor(message, data, ...args) {super(message, ...args); this.data = data}}
 
 async function _storeCreate(fields, {c}) {
     let writeRes = null
@@ -68,7 +68,7 @@ async function _update(id, fields, {update, getById, validate, validateObjectId,
 
     // see do validation in a specialized method
     const idFieldName = containsId(fields)
-    if (idFieldName) throw {errors: [], node: {[idFieldName]: errors: [m.FieldUnknown.create(e.message, e)], node: null}}
+    if (idFieldName) throw {errors: [], node: {[idFieldName]: {errors: [m.FieldUnknown.create(e.message, e)], node: null}}}
 
     let res = null
     try {
