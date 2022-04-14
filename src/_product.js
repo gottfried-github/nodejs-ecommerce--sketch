@@ -10,7 +10,7 @@ const CONTAINS_ID_MSG = "data contains _id: updating document _id is not allowed
 
 class InvalidData extends Errors {constructor(message, data, ...args) {super(message, ...args); this.data = data}}
 
-async function storeCreate(fields, {c}) {
+async function _storeCreate(fields, {c}) {
     let writeRes = null
 
     try {
@@ -26,7 +26,7 @@ async function storeCreate(fields, {c}) {
 /**
     @param {id, in Types} id
 */
-async function storeUpdate(id, fields, {c}) {
+async function _storeUpdate(id, fields, {c}) {
     let res = null
     try {
         res = await c.updateOne({_id: id}, {$set: fields})
@@ -40,7 +40,7 @@ async function storeUpdate(id, fields, {c}) {
     return true
 }
 
-async function storeGetById(id, {c, validateObjectId, m}) {
+async function _storeGetById(id, {c}) {
     const res = c.findOne({_id: id})
     return res
 }
@@ -48,9 +48,9 @@ async function storeGetById(id, {c, validateObjectId, m}) {
 /**
     @param {fields, in Types} fields
 */
-async function create(fields, {create, validate}) {
+async function _create(fields, {create, validate}) {
     try {
-        await storeCreate(fields)
+        await create(fields)
     } catch(e) {
         if (!(e instanceof InvalidData)) throw e
 
@@ -65,7 +65,7 @@ async function create(fields, {create, validate}) {
     @param {id, in Types} id
     @param {fields, in Types} fields
 */
-async function update(id, fields, {update, validate}) {
+async function _update(id, fields, {update, getById, validate, validateObjectId, containsId}) {
     // see do validation in a specialized method
     const idE = validateObjectId(id)
     if (idE) throw m.InvalidCriterion.create(idE.message, idE)
@@ -94,10 +94,15 @@ async function update(id, fields, {update, validate}) {
 /**
     @param {id, in Types} id
 */
-async function getById(id) {
+async function _getById(id, {getById, validateObjectId}) {
     // see do validation in a specialized method
     const idE = validateObjectId(id)
     if (idE) throw m.InvalidCriterion.create(idE.message, idE)
 
-    return storeGetById(id)
+    return getById(id)
+}
+
+export {
+    _storeCreate, _storeUpdate, _storeGetById,
+    _create, _update, _getById,
 }
