@@ -107,6 +107,33 @@ function testUpdate() {
             assert.strictEqual(isEqual, true)
         })
     })
+
+    describe("update throws a non-InvalidData error", () => {
+        it("throws the error on AND doesn't call any other dependencies", async () => {
+            const getByIdCalls = [], validateCalls = []
+            const ERR_MSG = "an error message"
+
+            try {
+                await _update("", {}, {
+                    update: async () => {throw new Error(ERR_MSG)},
+                    getById: async () => {getByIdCalls.push(null)},
+                    validate: () => {validateCalls.push(null)},
+                    validateObjectId: () => {return false},
+                    containsId: () => {return false}
+                })
+            } catch(e) {
+                return assert(
+                    // error is the one, thrown by update
+                    ERR_MSG === e.message
+
+                    // none of the other dependencies has been called
+                    && [getByIdCalls.length, validateCalls.length].filter(l => 0 !== l).length === 0
+                )
+            }
+
+            assert.fail("_update didn't throw")
+        })
+    })
 }
 
 export {testUpdate}
