@@ -65,6 +65,8 @@ An `objecId` can actually be not only a string. For example, if I pass to `valid
 Presumably, there's no docs with `objectId`-invalid ids (because store makes sure this doesn't happen during create operation). Therefore, if I don't validate the `id`, no document will be found. In such case, an error will be thrown, stating that the document the user tries to update (in case of `update`) doesn't exist, but it won't specify the reason, which, in our case is an invalid id. Following the principle, that maximally detailed information should be provided during data validation, I conclude that I should validate the id.
 ### do validation at the level of the store- methods
 id validation has to do with specifics of mongodb, which the controllers aren't concerned with. So the validation is ought to be done at the store- level.
+### do validation in a specialized method
+The method encapsulates the mongodb logic and of itself provides an abstraction. Therefore it can be used in the controllers. 
 
 ## Prohibiting updating `_id`
 Including an `_id` in fields would modify the id of the document. If, for example, other documents reference the updated document, then we'd need to update those docs too. For now, I just don't allow to update document's id.

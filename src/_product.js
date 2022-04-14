@@ -27,13 +27,6 @@ async function storeCreate(fields, {c}) {
     @param {id, in Types} id
 */
 async function storeUpdate(id, fields, {c}) {
-    // see update, storeGetById: whether to validate id
-    const idE = validateObjectId(id)
-    if (idE) throw m.InvalidCriterion.create(idE.message, idE)
-
-    // see Prohibiting updating `_id`
-    if ('_id' in fields) throw new InvalidData(CONTAINS_ID_MSG)
-
     let res = null
     try {
         res = await c.updateOne({_id: id}, {$set: fields})
@@ -48,10 +41,6 @@ async function storeUpdate(id, fields, {c}) {
 }
 
 async function storeGetById(id, {c, validateObjectId, m}) {
-    // see update, storeGetById: whether to validate id
-    const idE = validateObjectId(id)
-    if (idE) throw m.InvalidCriterion.create(idE.message, idE)
-
     const res = c.findOne({_id: id})
     return res
 }
@@ -77,14 +66,20 @@ async function create(fields, {create, validate}) {
     @param {fields, in Types} fields
 */
 async function update(id, fields, {update, validate}) {
+    // see do validation in a specialized method
+    const idE = validateObjectId(id)
+    if (idE) throw m.InvalidCriterion.create(idE.message, idE)
+
+    // see do validation in a specialized method
+    const idFieldName = containsId(fields)
+    if (idFieldName) throw {errors: [], node: {[idFieldName]: errors: [m.FieldUnknown.create(e.message, e)], node: null}}
+
     let res = null
     try {
         res = await update(id, fields)
     } catch (e) {
         // 121 is validation error: erroneous response example in https://www.mongodb.com/docs/manual/core/schema-validation/#existing-documents
         if (!(e instanceof InvalidData)) throw e
-
-        if (CONTAINS_ID_MSG === e.message) throw {errors: [], node: {_id: errors: [m.FieldUnknown.create(e.message, e)], node: null}}
 
         // do additional validation only if builtin validation fails. See mongodb with bsonschema: is additional data validation necessary?
         const doc = await getById(id)
@@ -99,6 +94,10 @@ async function update(id, fields, {update, validate}) {
 /**
     @param {id, in Types} id
 */
-async function getById() {
-    // first, validate id (see update, storeGetById: whether to validate id)
+async function getById(id) {
+    // see do validation in a specialized method
+    const idE = validateObjectId(id)
+    if (idE) throw m.InvalidCriterion.create(idE.message, idE)
+
+    return storeGetById(id)
 }

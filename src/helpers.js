@@ -20,6 +20,7 @@ function _parseFirstOneOfItemPath(schemaPath) {
     return oneOfPath
 }
 
+// see do validation in a specialized method
 function validateObjectId(id) {
     if ([null, undefined].includes(id)) return new Error(`id cannot be null or undefined`)
 
@@ -32,4 +33,9 @@ function validateObjectId(id) {
     return null
 }
 
-export {_parseFirstOneOfItemPath, validateObjectId}
+// see do validation in a specialized method
+function containsId(data) {
+    return '_id' in data ? '_id' : false
+}
+
+export {_parseFirstOneOfItemPath, validateObjectId, containsId}
