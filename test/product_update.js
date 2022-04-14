@@ -16,16 +16,33 @@ function testUpdate() {
         })
     })
 
-    // describe("validateObjectId returns truthy", () => {
-    //     it("throws InvalidCriterion and doesn't call any other dependencies", () => {
-    //         const updateCalls = [], getByIdCalls = [], validateCalls = [], validateObjectIdCalls = [], containsIdCalls = []
-    //         try {
-    //             _update("", )
-    //         } catch(e) {
-    //
-    //         }
-    //     })
-    // })
+    describe("validateObjectId returns truthy", () => {
+        it("throws InvalidCriterion with the returned value as data AND doesn't call any other dependencies", async () => {
+            const updateCalls = [], getByIdCalls = [], validateCalls = [], containsIdCalls = []
+            const idE = "a error with id"
+            try {
+                await _update("", {}, {
+                    update: () => {updateCalls.push(null)},
+                    getById: () => {getByIdCalls.push(null)},
+                    validate: () => {validateCalls.push(null)},
+                    validateObjectId: () => {return idE},
+                    containsId: () => {containsIdCalls.push(null)}
+                })
+            } catch(e) {
+                return assert(
+                    // error is an InvalidCriterion
+                    m.InvalidCriterion.code === e.code
+
+                    && idE === e.data
+
+                    // none of the other dependencies has been called
+                    && [updateCalls.length, getByIdCalls.length, validateCalls.length, containsIdCalls.length].filter(l => 0 !== l).length === 0
+                )
+            }
+
+            assert.fail("_update didn't throw")
+        })
+    })
 }
 
 export {testUpdate}
