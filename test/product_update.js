@@ -134,6 +134,26 @@ function testUpdate() {
             assert.fail("_update didn't throw")
         })
     })
+
+    describe("update doesn't throw", () => {
+        it("returns true AND doesn't call any other dependencies", async () => {
+            const getByIdCalls = [], validateCalls = []
+            const res = await _update("", {}, {
+                update: async () => {},
+                getById: async () => {getByIdCalls.push(null)},
+                validate: () => {validateCalls.push(null)},
+                validateObjectId: () => {return false},
+                containsId: () => {return false}
+            })
+
+            return assert(
+                true === res
+
+                // none of the other dependencies has been called
+                && [getByIdCalls.length, validateCalls.length].filter(l => 0 !== l).length === 0
+            )
+        })
+    })
 }
 
 export {testUpdate}

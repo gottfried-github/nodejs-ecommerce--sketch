@@ -85,6 +85,8 @@ async function _update(id, fields, {update, getById, validate, validateObjectId,
         if (!errors) throw new Error("mongodb validation fails while model level validation succeeds")
         throw errors
     }
+
+    return true
 }
 
 /**
