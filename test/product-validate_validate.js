@@ -36,12 +36,32 @@ const testsJSON = {
     }],
 }
 
+const id = "an invalid id"
+
 const testsBSON = {
-    singleCorrectError: [{
-        i: [{isInSale: false, itemInitial: "an invalid id"}],
-        o: validate,
-        description: "JSON-valid but BSON-invalid: itemInitial is an invalid string objectId"
-    }],
+    singleCorrectError: [
+        {
+            i: [{isInSale: false, itemInitial: id}],
+            o: validate,
+            description: "JSON-valid but BSON-invalid: itemInitial is an invalid string objectId",
+            erroneousFieldname: 'itemInitial',
+            erroneousValue: id
+        },
+        {
+            i: [{isInSale: false, itemInitial: new ObjectId(), _id: id}],
+            o: validate,
+            description: "JSON-valid but BSON-invalid: _id is an invalid string objectId",
+            erroneousFieldname: '_id',
+            erroneousValue: id
+        }
+    ],
+    // twoCorrectErrors: [{
+    //     i: [{isInSale: false, itemInitial: id, _id: id}],
+    //     o: validate,
+    //     description: "JSON-valid but BSON-invalid: itemInitial is an invalid string objectId",
+    //     erroneousFieldnames: ['itemInitial', '_id'],
+    //     erroneousValues: [id, id]
+    // }],
     returnsNull: [
         {
             i: [{isInSale: false, itemInitial: new ObjectId().toString()}],

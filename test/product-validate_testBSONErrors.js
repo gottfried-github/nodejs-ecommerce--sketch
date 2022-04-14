@@ -11,6 +11,10 @@ const id = "an invalid id"
 function testBSONErrors(tests) {
     tests.singleCorrectError.forEach(t => {
         describe(t.description || "", () => {
+            console.log(t)
+            const errors = t.o(...t.i)
+            console.log("errors:", errors)
+
             it("returns truthy", () => {
                 assert(!!t.o(...t.i))
             })
@@ -19,7 +23,7 @@ function testBSONErrors(tests) {
                 const errors = t.o(...t.i)
                 assert(
                     // itemInitial is the only node and it has only one error
-                    1 === Object.keys(errors.node).length && 'itemInitial' in errors.node && 1 === errors.node.itemInitial.errors.length
+                    1 === Object.keys(errors.node).length && t.erroneousFieldname in errors.node && 1 === errors.node[t.erroneousFieldname].errors.length
                 )
             })
 
@@ -27,12 +31,12 @@ function testBSONErrors(tests) {
                 const errors = t.o(...t.i)
 
                 try {
-                    new ObjectId(id)
+                    new ObjectId(t.erroneousValue)
                 } catch(e) {
                     return assert(
                         // error is a BSONTypeError and is the same as the error thrown by ObjectId
-                        errors.node.itemInitial.errors[0] instanceof BSONTypeError
-                        && e.message === errors.node.itemInitial.errors[0].message
+                        errors.node[t.erroneousFieldname].errors[0] instanceof BSONTypeError
+                        && e.message === errors.node[t.erroneousFieldname].errors[0].message
                     )
                 }
             })

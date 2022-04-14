@@ -11,9 +11,25 @@ function testValidateBSON() {
             {
                 i: [{itemInitial: id}],
                 o: _validateBSON,
-                description: "itemInitial is an invalid string objectId"
+                description: "itemInitial is an invalid string objectId",
+                erroneousFieldname: 'itemInitial',
+                erroneousValue: id
+            },
+            {
+                i: [{itemInitial: new ObjectId(), _id: id}],
+                o: _validateBSON,
+                description: "itemInitial is valid, _id is an invalid string objectId",
+                erroneousFieldname: '_id',
+                erroneousValue: id
             }
         ],
+        // twoCorrectErrors: [{
+        //     i: [{isInSale: false, itemInitial: id, _id: id}],
+        //     o: validate,
+        //     description: "JSON-valid but BSON-invalid: itemInitial is an invalid string objectId",
+        //     erroneousFieldnames: ['itemInitial', '_id'],
+        //     erroneousValues: [id, id]
+        // }],
         returnsNull: [
             {
                 i: [{itemInitial: new ObjectId().toString()}],
