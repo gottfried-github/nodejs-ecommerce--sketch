@@ -8,7 +8,7 @@ function testUpdate() {
         it("passes the 'id' argument to validateObjectId", async () => {
             const id = "an id"
             let isEqual = null
-            await _update(id, {}, {update: () => {}, getById: () => {}, validate: () => {},
+            await _update(id, {}, {update: async () => {}, getById: async () => {}, validate: () => {},
                 validateObjectId: (_id) => {isEqual = id === _id}, containsId: () => {}
             })
 
@@ -22,8 +22,8 @@ function testUpdate() {
             const idE = "a error with id"
             try {
                 await _update("", {}, {
-                    update: () => {updateCalls.push(null)},
-                    getById: () => {getByIdCalls.push(null)},
+                    update: async () => {updateCalls.push(null)},
+                    getById: async () => {getByIdCalls.push(null)},
                     validate: () => {validateCalls.push(null)},
                     validateObjectId: () => {return idE},
                     containsId: () => {containsIdCalls.push(null)}
@@ -45,13 +45,13 @@ function testUpdate() {
     })
 
     describe("validateObjectId returns falsy", () => {
-        it("containsId gets called AND 'fields' argument is passed to it", () => {
+        it("containsId gets called AND 'fields' argument is passed to it", async () => {
             const fields = "fields"
             let isEqual = null
 
-            _update("", fields, {
-                update: () => {},
-                getById: () => {},
+            await _update("", fields, {
+                update: async () => {},
+                getById: async () => {},
                 validate: () => {},
                 validateObjectId: () => {return false},
                 containsId: (data) => {isEqual = fields === data}
@@ -67,8 +67,8 @@ function testUpdate() {
             const idFieldName = "_id"
             try {
                 await _update("", {}, {
-                    update: () => {updateCalls.push(null)},
-                    getById: () => {getByIdCalls.push(null)},
+                    update: async () => {updateCalls.push(null)},
+                    getById: async () => {getByIdCalls.push(null)},
                     validate: () => {validateCalls.push(null)},
                     validateObjectId: () => {return false},
                     containsId: () => {return idFieldName}
@@ -88,6 +88,23 @@ function testUpdate() {
             }
 
             assert.fail("_update didn't throw")
+        })
+    })
+
+    describe("containsId returns falsy", () => {
+        it("update gets called AND the arguments are passed to it", async () => {
+            const id = "an id", fields = "fields"
+            let isEqual = null
+
+            await _update(id, fields, {
+                update: async (_id, _fields) => {isEqual = id === _id && fields === _fields},
+                getById: async () => {},
+                validate: () => {},
+                validateObjectId: () => {return false},
+                containsId: (data) => {return false}
+            })
+
+            assert.strictEqual(isEqual, true)
         })
     })
 }
