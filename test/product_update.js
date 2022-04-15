@@ -94,7 +94,6 @@ function testUpdate() {
 
     describe("update throws a non-InvalidData error", () => {
         it("throws the error on AND doesn't call any other dependencies", async () => {
-            const getByIdCalls = [], validateCalls = []
             const ERR_MSG = "an error message"
 
             try {
@@ -109,9 +108,6 @@ function testUpdate() {
                 return assert(
                     // error is the one, thrown by update
                     ERR_MSG === e.message
-
-                    // none of the other dependencies has been called
-                    && [getByIdCalls.length, validateCalls.length].filter(l => 0 !== l).length === 0
                 )
             }
 
@@ -121,7 +117,6 @@ function testUpdate() {
 
     describe("update throws an InvalidData", () => {
         it("getById is called with the 'id' argument", async () => {
-            const validateCalls = []
             const id = "an id"
             let isEqual = null
 
@@ -142,7 +137,6 @@ function testUpdate() {
         })
 
         it("validate is called with the 'fields' argument assigned the object, returned by getById", async () => {
-            const validateCalls = []
             const fields = {a: 0, b: 1}, doc = {b: 2}
             let _fieldsCorrect = null
 
