@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 import * as m from 'bazar-api/src/messages.js'
 
-import {_update} from '../src/_product.js'
+import {_update, InvalidData} from '../src/_product.js'
 
 function testUpdate() {
     describe("is passed an id", () => {
@@ -136,6 +136,50 @@ function testUpdate() {
                 // none of the other dependencies has been called
                 && [getByIdCalls.length, validateCalls.length].filter(l => 0 !== l).length === 0
             )
+        })
+    })
+
+    describe("update throws an InvalidData", () => {
+        it("getById is called with the 'id' argument", async () => {
+            const validateCalls = []
+            const id = "an id"
+            let isEqual = null
+
+            // once getById is called, validate should be called and then _update should throw
+            try {
+                const res = await _update(id, {}, {
+                    update: async () => {throw new InvalidData()},
+                    getById: async (_id) => {isEqual = id === _id},
+                    validate: () => {return true},
+                    validateObjectId: () => {return false},
+                    containsId: () => {return false}
+                })
+            } catch(e) {
+                return assert.strictEqual(isEqual, true)
+            }
+        })
+
+        it("validate is called with the the 'fields' argument assigned the object, returned by getById", async () => {
+            const validateCalls = []
+            const fields = {a: 0, b: 1}, doc = {b: 2}
+            let _fieldsCorrect = null
+
+            // once getById is called, validate should be called and then _update should throw
+            try {
+                const res = await _update("", fields, {
+                    update: async () => {throw new InvalidData()},
+                    getById: async () => {return doc},
+                    validate: (_fields) => {
+                        const keys = Object.keys(_fields)
+                        _fieldsCorrect = 2 === keys.length && keys.includes('a') && keys.includes('b')
+                        && fields.a === _fields.a && doc.b === _fields.b
+                    },
+                    validateObjectId: () => {return false},
+                    containsId: () => {return false}
+                })
+            } catch(e) {
+                return assert.strictEqual(_fieldsCorrect, true)
+            }
         })
     })
 }

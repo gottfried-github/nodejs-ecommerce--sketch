@@ -103,4 +103,5 @@ async function _getById(id, {getById, validateObjectId}) {
 export {
     _storeCreate, _storeUpdate, _storeGetById,
     _create, _update, _getById,
+    InvalidData,
 }
