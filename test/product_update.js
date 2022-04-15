@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 import * as m from 'bazar-api/src/messages.js'
 
-import {_update, InvalidData} from '../src/_product.js'
+import {_update, InvalidData, ValidationConflict} from '../src/_product.js'
 
 function testUpdate() {
     describe("is passed an id", () => {
@@ -157,9 +157,11 @@ function testUpdate() {
             } catch(e) {
                 return assert.strictEqual(isEqual, true)
             }
+
+            assert.fail()
         })
 
-        it("validate is called with the the 'fields' argument assigned the object, returned by getById", async () => {
+        it("validate is called with the 'fields' argument assigned the object, returned by getById", async () => {
             const validateCalls = []
             const fields = {a: 0, b: 1}, doc = {b: 2}
             let _fieldsCorrect = null
@@ -180,6 +182,50 @@ function testUpdate() {
             } catch(e) {
                 return assert.strictEqual(_fieldsCorrect, true)
             }
+
+            assert.fail()
+        })
+
+        describe("validate returns falsy", () => {
+            it("throws ValidationConflict", async () => {
+                try {
+                    await _update("", {}, {
+                        update: async () => {throw new InvalidData()},
+                        getById: async () => {return true},
+                        validate: () => {
+                            return false
+                        },
+                        validateObjectId: () => {return false},
+                        containsId: () => {return false}
+                    })
+                } catch(e) {
+                    return assert.instanceOf(e, ValidationConflict)
+                }
+
+                assert.fail()
+            })
+        })
+
+        describe("validate returns truthy", () => {
+            it("throws the returned value", async () => {
+                const errors = "errors"
+
+                try {
+                    await _update("", {}, {
+                        update: async () => {throw new InvalidData()},
+                        getById: async () => {return true},
+                        validate: () => {
+                            return errors
+                        },
+                        validateObjectId: () => {return false},
+                        containsId: () => {return false}
+                    })
+                } catch(e) {
+                    return assert.strictEqual(e, errors)
+                }
+
+                assert.fail()
+            })
         })
     })
 }

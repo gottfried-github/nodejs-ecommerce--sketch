@@ -4,7 +4,12 @@ import {BSONTypeError} from 'bson'
 import * as m from 'bazar-api/src/messages.js'
 
 const VALIDATION_FAIL_MSG = "data validation failed"
+const VALIDATION_CONFLICT_MSG = "mongodb validation fails while model level validation succeeds"
+
 class InvalidData extends Error {constructor(message, data, ...args) {super(message, ...args); this.data = data}}
+class ValidationConflict extends Error {constructor(message, data, ...args) {super(message, ...args); this.data = data}}
+
+
 
 async function _storeCreate(fields, {c}) {
     let writeRes = null
@@ -52,7 +57,7 @@ async function _create(fields, {create, validate}) {
 
         const errors = validate(fields)
 
-        if (!errors) throw new Error("mongodb validation fails while model level validation succeeds")
+        if (!errors) throw new ValidationConflict(VALIDATION_CONFLICT_MSG, {builtin: e})
         throw errors
     }
 }
@@ -82,7 +87,7 @@ async function _update(id, fields, {update, getById, validate, validateObjectId,
 
         const errors = validate(Object.assign(doc, fields))
 
-        if (!errors) throw new Error("mongodb validation fails while model level validation succeeds")
+        if (!errors) throw new ValidationConflict(VALIDATION_CONFLICT_MSG, {builtin: e})
         throw errors
     }
 
@@ -103,5 +108,6 @@ async function _getById(id, {getById, validateObjectId}) {
 export {
     _storeCreate, _storeUpdate, _storeGetById,
     _create, _update, _getById,
-    InvalidData,
+    InvalidData, ValidationConflict,
+    VALIDATION_FAIL_MSG, VALIDATION_CONFLICT_MSG
 }
