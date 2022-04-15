@@ -18,7 +18,8 @@ function testUpdate() {
 
     describe("validateObjectId returns truthy", () => {
         it("throws InvalidCriterion with the returned value as data AND doesn't call any other dependencies", async () => {
-            const updateCalls = [], getByIdCalls = [], validateCalls = [], containsIdCalls = []
+            // see '`_product`, testing `_update`: the order of `validateObjectId` and `containsId` doesn't matter' for why I don't check whether containsId has been called
+            const updateCalls = [], getByIdCalls = [], validateCalls = []
             const idE = "a error with id"
             try {
                 await _update("", {}, {
@@ -26,7 +27,7 @@ function testUpdate() {
                     getById: async () => {getByIdCalls.push(null)},
                     validate: () => {validateCalls.push(null)},
                     validateObjectId: () => {return idE},
-                    containsId: () => {containsIdCalls.push(null)}
+                    containsId: () => {return false}
                 })
             } catch(e) {
                 return assert(
@@ -36,28 +37,11 @@ function testUpdate() {
                     && idE === e.data
 
                     // none of the other dependencies has been called
-                    && [updateCalls.length, getByIdCalls.length, validateCalls.length, containsIdCalls.length].filter(l => 0 !== l).length === 0
+                    && [updateCalls.length, getByIdCalls.length, validateCalls.length].filter(l => 0 !== l).length === 0
                 )
             }
 
             assert.fail("_update didn't throw")
-        })
-    })
-
-    describe("validateObjectId returns falsy", () => {
-        it("containsId gets called AND 'fields' argument is passed to it", async () => {
-            const fields = "fields"
-            let isEqual = null
-
-            await _update("", fields, {
-                update: async () => {},
-                getById: async () => {},
-                validate: () => {},
-                validateObjectId: () => {return false},
-                containsId: (data) => {isEqual = fields === data}
-            })
-
-            assert.strictEqual(isEqual, true)
         })
     })
 
@@ -91,7 +75,7 @@ function testUpdate() {
         })
     })
 
-    describe("containsId returns falsy", () => {
+    describe("validateObjectId and containsId return falsy", () => {
         it("update gets called AND the arguments are passed to it", async () => {
             const id = "an id", fields = "fields"
             let isEqual = null

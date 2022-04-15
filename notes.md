@@ -66,7 +66,7 @@ Presumably, there's no docs with `objectId`-invalid ids (because store makes sur
 ### do validation at the level of the store- methods
 id validation has to do with specifics of mongodb, which the controllers aren't concerned with. So the validation is ought to be done at the store- level.
 ### do validation in a specialized method
-The method encapsulates the mongodb logic and of itself provides an abstraction. Therefore it can be used in the controllers. 
+The method encapsulates the mongodb logic and of itself provides an abstraction. Therefore it can be used in the controllers.
 
 ## Prohibiting updating `_id`
 Including an `_id` in fields would modify the id of the document. If, for example, other documents reference the updated document, then we'd need to update those docs too. For now, I just don't allow to update document's id.
@@ -104,3 +104,6 @@ The method is private, it's meant to be used by `validate`, which JSON-validate 
 In `validate`, I don't check whether `itemInitial` is present in the fields before passing them to `_validateBSON`, because which fields should be validated against BSON is not the concern of `validate`: it's the concern of `_validateBSON`. Henceforth, `_validateBSON` should handle it itself. Before it handled it implicitly, because `ObjectId` just generates a new id if passed `undefined` or `null`. But handling it explicitly makes the code a bit more accessible.
 ## What if `itemInitial` is set, but is `null` or `undefined`?
 Again, `ObjectId` simply generates a new id if passed either of those - hence generating no error. But for the case that `_validateBSON` is designed for this is not appropriate: `itemInitial` must be an existing value, that should be a valid `objectId`. But, `_validateBSON` is a private method, used only by `validate`, which makes sure that `itemInitial`, if any, is a string, before passing the fields to `_validateBSON`.
+
+# `_product`, testing `_update`: the order of `validateObjectId` and `containsId` doesn't matter
+It doesn't matter which of the methods is called first and which is second. What matters: is that the data they return, if truthy, is thrown by `_update`, before `update` gets called. Thus, it doesn't matter whether one of the methods has been called before the other returned the truthy value.
