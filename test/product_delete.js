@@ -56,6 +56,37 @@ function testDelete() {
             assert.strictEqual(isEqual, true)
         })
     })
+
+    describe("storeDelete returns null", () => {
+        it("throws InvalidCriterion", async () => {
+
+            try {
+                await _delete("", {
+                    validateObjectId: () => {return false},
+                    storeDelete: async () => {return null},
+                })
+            } catch(e) {
+                return assert(
+                    // error is an InvalidCriterion
+                    m.InvalidCriterion.code === e.code
+                )
+            }
+
+            assert.fail("_delete didn't throw")
+        })
+    })
+
+    describe("storeDelete returns true", () => {
+        it("returns true", async () => {
+
+            const res = await _delete("", {
+                validateObjectId: () => {return false},
+                storeDelete: async (_id) => {return true},
+            })
+
+            assert.strictEqual(res, true)
+        })
+    })
 }
 
 export {testDelete}
