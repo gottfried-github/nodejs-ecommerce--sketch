@@ -2,8 +2,8 @@ import {validateObjectId, containsId} from './helpers.js'
 import {validate} from './_product-validate.js'
 
 import {
-    _storeCreate, _storeUpdate, _storeGetById,
-    _create, _update, _getById
+    _storeCreate, _storeUpdate, _storeDelete, _storeGetById,
+    _create, _update, _delete, _getById
 } from './_product.js'
 
 function Product(c) {
@@ -24,19 +24,19 @@ function Product(c) {
     }
 
     return {
-        async getById(id) {
+        getById: async (id) => {
             return _getById(id, {getById: storeGetById, validateObjectId})
-        }
+        },
 
-        async create(fields) {
+        create: async (fields) => {
             return _create(fields, {create: storeCreate, validate})
-        }
+        },
 
-        async update(id, fields) {
+        update: async (id, fields) => {
             return _update(id, fields, {update: storeUpdate, getById: storeGetById, validate, validateObjectId, containsId})
-        }
+        },
 
-        async delete(id) {
+        delete: async (id) => {
             return _delete(id, {storeDelete, validateObjectId})
         }
     }
