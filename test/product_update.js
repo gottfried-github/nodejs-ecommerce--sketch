@@ -8,7 +8,7 @@ function testUpdate() {
         it("passes the 'id' argument to validateObjectId", async () => {
             const id = "an id"
             let isEqual = null
-            await _update(id, {}, {update: async () => {}, getById: async () => {}, validate: () => {},
+            await _update(id, {}, {update: async () => {return true}, getById: async () => {}, validate: () => {},
                 validateObjectId: (_id) => {isEqual = id === _id}, containsId: () => {}
             })
 
@@ -81,7 +81,7 @@ function testUpdate() {
             let isEqual = null
 
             await _update(id, fields, {
-                update: async (_id, _fields) => {isEqual = id === _id && fields === _fields},
+                update: async (_id, _fields) => {isEqual = id === _id && fields === _fields; return true},
                 getById: async () => {},
                 validate: () => {},
                 validateObjectId: () => {return false},
@@ -207,7 +207,7 @@ function testUpdate() {
         it("returns true AND doesn't call any other dependencies", async () => {
             const getByIdCalls = [], validateCalls = []
             const res = await _update("", {}, {
-                update: async () => {},
+                update: async () => {return true},
                 getById: async () => {getByIdCalls.push(null)},
                 validate: () => {validateCalls.push(null)},
                 validateObjectId: () => {return false},

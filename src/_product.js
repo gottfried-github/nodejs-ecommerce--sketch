@@ -50,8 +50,9 @@ async function _storeGetById(id, {c}) {
     @param {fields, in Types} fields
 */
 async function _create(fields, {create, validate}) {
+    let res = null
     try {
-        await create(fields)
+        res = await create(fields)
     } catch(e) {
         if (!(e instanceof InvalidData)) throw e
 
@@ -60,6 +61,9 @@ async function _create(fields, {create, validate}) {
         if (!errors) throw new ValidationConflict(VALIDATION_CONFLICT_MSG, {builtin: e})
         throw errors
     }
+
+    if (true !== res) throw new Error("create haven't thrown but didn't return true")
+    return true
 }
 
 /**
@@ -91,6 +95,7 @@ async function _update(id, fields, {update, getById, validate, validateObjectId,
         throw errors
     }
 
+    if (true !== res) throw new Error("update haven't thrown but didn't return true")
     return true
 }
 

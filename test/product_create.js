@@ -1,3 +1,8 @@
+import {assert} from 'chai'
+import * as m from 'bazar-api/src/messages.js'
+
+import {_create, InvalidData, ValidationConflict} from '../src/_product.js'
+
 function testCreate() {
     describe("create throws a non-InvalidData error", () => {
         it("throws the error on AND doesn't call any other dependencies", async () => {
@@ -5,7 +10,7 @@ function testCreate() {
             const ERR_MSG = "an error message"
 
             try {
-                await _update("", {}, {
+                await _create({}, {
                     create: async () => {throw new Error(ERR_MSG)},
                     validate: () => {validateCalls.push(null)},
                 })
@@ -19,27 +24,25 @@ function testCreate() {
                 )
             }
 
-            assert.fail("_update didn't throw")
+            assert.fail("_create didn't throw")
         })
     })
 
     describe("create throws an InvalidData", () => {
         it("validate is called with the 'fields' argument", async () => {
-            const fields = {a: 0, b: 1}, doc = {b: 2}
-            let _fieldsCorrect = null
+            const fields = "fields"
+            let isEqual = null
 
-            // once getById is called, validate should be called and then _update should throw
+            // once getById is called, validate should be called and then _create should throw
             try {
-                const res = await _update("", fields, {
+                const res = await _create(fields, {
                     create: async () => {throw new InvalidData()},
                     validate: (_fields) => {
-                        const keys = Object.keys(_fields)
-                        _fieldsCorrect = 2 === keys.length && keys.includes('a') && keys.includes('b')
-                        && fields.a === _fields.a && doc.b === _fields.b
+                        isEqual = fields === _fields
                     },
                 })
             } catch(e) {
-                return assert.strictEqual(_fieldsCorrect, true)
+                return assert.strictEqual(isEqual, true)
             }
 
             assert.fail()
@@ -48,7 +51,7 @@ function testCreate() {
         describe("validate returns falsy", () => {
             it("throws ValidationConflict", async () => {
                 try {
-                    await _update("", {}, {
+                    await _create({}, {
                         create: async () => {throw new InvalidData()},
                         validate: () => {
                             return false
@@ -67,7 +70,7 @@ function testCreate() {
                 const errors = "errors"
 
                 try {
-                    await _update("", {}, {
+                    await _create({}, {
                         create: async () => {throw new InvalidData()},
                         validate: () => {
                             return errors
@@ -85,8 +88,8 @@ function testCreate() {
     describe("create doesn't throw", () => {
         it("returns true AND doesn't call any other dependencies", async () => {
             const validateCalls = []
-            const res = await _update("", {}, {
-                create: async () => {},
+            const res = await _create({}, {
+                create: async () => {return true},
                 validate: () => {validateCalls.push(null)},
             })
 
@@ -99,3 +102,5 @@ function testCreate() {
         })
     })
 }
+
+export {testCreate}
