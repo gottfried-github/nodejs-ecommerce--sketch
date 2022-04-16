@@ -15,6 +15,10 @@ function Product(c) {
         return _storeUpdate(id, fields, {c})
     }
 
+    function storeDelete(id) {
+        return _storeDelete(id, {c})
+    }
+
     function storeGetById(id) {
         return _storeGetById(id, {c})
     }
@@ -30,6 +34,10 @@ function Product(c) {
 
         async update(id, fields) {
             return _update(id, fields, {update: storeUpdate, getById: storeGetById, validate, validateObjectId, containsId})
+        }
+
+        async delete(id) {
+            return _delete(id, {storeDelete, validateObjectId})
         }
     }
 }

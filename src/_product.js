@@ -106,7 +106,7 @@ async function _update(id, fields, {update, getById, validate, validateObjectId,
     return true
 }
 
-async function _delete(id, {validateObjectId, storeDelete}) {
+async function _delete(id, {storeDelete, validateObjectId}) {
     // see do validation in a specialized method
     const idE = validateObjectId(id)
     if (idE) throw m.InvalidCriterion.create(idE.message, idE)
