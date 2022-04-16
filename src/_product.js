@@ -12,16 +12,16 @@ class ValidationConflict extends Error {constructor(message, data, ...args) {sup
 
 
 async function _storeCreate(fields, {c}) {
-    let writeRes = null
+    let res = null
 
     try {
-        writeRes = await c.insertOne(fields)
+        res = await c.insertOne(fields)
     } catch(e) {
         if (121 === e.code) e = new InvalidData(VALIDATION_FAIL_MSG, e)
         throw e
     }
 
-    return true
+    return res.insertedId
 }
 
 /**
@@ -52,9 +52,9 @@ async function _storeGetById(id, {c}) {
     @param {fields, in Types} fields
 */
 async function _create(fields, {create, validate}) {
-    let res = null
+    let id = null
     try {
-        res = await create(fields)
+        id = await create(fields)
     } catch(e) {
         if (!(e instanceof InvalidData)) throw e
 
@@ -64,8 +64,7 @@ async function _create(fields, {create, validate}) {
         throw errors
     }
 
-    if (true !== res) throw new Error("create haven't thrown but didn't return true")
-    return true
+    return id
 }
 
 /**

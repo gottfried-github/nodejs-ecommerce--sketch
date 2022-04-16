@@ -85,16 +85,18 @@ function testCreate() {
         })
     })
 
-    describe("create doesn't throw", () => {
-        it("returns true AND doesn't call any other dependencies", async () => {
+    describe("create returns a value", () => {
+        it("returns the returned value AND doesn't call the other dependencies", async () => {
             const validateCalls = []
+            const id = "an id"
+
             const res = await _create({}, {
-                create: async () => {return true},
+                create: async () => {return id},
                 validate: () => {validateCalls.push(null)},
             })
 
             return assert(
-                true === res
+                id === res
 
                 // none of the other dependencies has been called
                 && [validateCalls.length].filter(l => 0 !== l).length === 0
