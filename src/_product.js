@@ -43,6 +43,12 @@ async function _storeUpdate(id, fields, {c}) {
     return true
 }
 
+async function _storeDelete(id, {c}) {
+    const res = await c.deleteOne({_id: id})
+    if (0 === res.deletedCount) return null
+    return true
+}
+
 async function _storeGetById(id, {c}) {
     const res = await c.findOne({_id: id})
     return res
@@ -100,6 +106,14 @@ async function _update(id, fields, {update, getById, validate, validateObjectId,
     return true
 }
 
+async function _delete(id, {validateObjectId, storeDelete}) {
+    // see do validation in a specialized method
+    const idE = validateObjectId(id)
+    if (idE) throw m.InvalidCriterion.create(idE.message, idE)
+
+    const res = await storeDelete(id)
+    if (null === res) throw m.InvalidCriterion.create("id must be of an existing document: no document found with given id")
+
     return true
 }
 
@@ -115,8 +129,8 @@ async function _getById(id, {getById, validateObjectId}) {
 }
 
 export {
-    _storeCreate, _storeUpdate, _storeGetById,
-    _create, _update, _getById,
+    _storeCreate, _storeUpdate, _storeDelete, _storeGetById,
+    _create, _update, _delete, _getById,
     InvalidData, ValidationConflict,
     VALIDATION_FAIL_MSG, VALIDATION_CONFLICT_MSG
 }
