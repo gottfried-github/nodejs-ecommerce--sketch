@@ -203,8 +203,52 @@ function testUpdate() {
         })
     })
 
-    describe("update doesn't throw", () => {
-        it("returns true AND doesn't call any other dependencies", async () => {
+    describe("update returns null", () => {
+        it("throws InvalidCriterion AND doesn't throw the other dependencies", async () => {
+            const getByIdCalls = [], validateCalls = []
+
+            try {
+                await _update("", {}, {
+                    update: async () => {return null},
+                    getById: async () => {getByIdCalls.push(null)},
+                    validate: () => {validateCalls.push(null)},
+                    validateObjectId: () => {return false},
+                    containsId: () => {return false}
+                })
+            } catch(e) {
+                return assert(
+                    // the error is an InvalidCriterion
+                    m.InvalidCriterion.code === e.code
+
+                    // none of the other dependencies has been called
+                    && [getByIdCalls.length, validateCalls.length].filter(l => 0 !== l).length === 0
+                )
+            }
+        })
+    })
+
+    describe("update returns false", () => {
+        it("returns true AND doesn't call the other dependencies", async () => {
+            const getByIdCalls = [], validateCalls = []
+            const res = await _update("", {}, {
+                update: async () => {return false},
+                getById: async () => {getByIdCalls.push(null)},
+                validate: () => {validateCalls.push(null)},
+                validateObjectId: () => {return false},
+                containsId: () => {return false}
+            })
+
+            return assert(
+                true === res
+
+                // none of the other dependencies has been called
+                && [getByIdCalls.length, validateCalls.length].filter(l => 0 !== l).length === 0
+            )
+        })
+    })
+
+    describe("update returns true", () => {
+        it("returns true AND doesn't call the other dependencies", async () => {
             const getByIdCalls = [], validateCalls = []
             const res = await _update("", {}, {
                 update: async () => {return true},

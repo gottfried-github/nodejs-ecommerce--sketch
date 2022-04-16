@@ -30,19 +30,21 @@ async function _storeCreate(fields, {c}) {
 async function _storeUpdate(id, fields, {c}) {
     let res = null
     try {
-        res = await c.updateOne({_id: id}, {$set: fields})
+        res = await c.updateOne({_id: id}, {$set: fields}, {upsert: false})
     } catch(e) {
         if (121 === e.code) e = new InvalidData(VALIDATION_FAIL_MSG, e)
         throw e
     }
 
-    if (!res.matchedCount) throw m.ResourceNotFound.create("the given id didn't match any products")
+    if (!res.matchedCount) return null
+    if (!res.modifiedCount) return false
+    // if (!res.matchedCount) throw m.ResourceNotFound.create("the given id didn't match any products")
 
     return true
 }
 
 async function _storeGetById(id, {c}) {
-    const res = c.findOne({_id: id})
+    const res = await c.findOne({_id: id})
     return res
 }
 
@@ -95,7 +97,10 @@ async function _update(id, fields, {update, getById, validate, validateObjectId,
         throw errors
     }
 
-    if (true !== res) throw new Error("update haven't thrown but didn't return true")
+    if (null === res) throw m.InvalidCriterion.create("id must be of an existing document: no document found with given id")
+    return true
+}
+
     return true
 }
 
