@@ -1,16 +1,17 @@
 import {ObjectId} from 'mongodb'
 import {BSONTypeError} from 'bson'
 
-import * as m from 'bazar-api/app/src/messages.js'
-
-// class InvalidId extends Errors {constructor(...args) {super(...args)}}
+import * as m from 'bazar-api/src/messages.js'
 
 const VALIDATION_FAIL_MSG = "data validation failed"
-const CONTAINS_ID_MSG = "data contains _id: updating document _id is not allowed"
+const VALIDATION_CONFLICT_MSG = "mongodb validation fails while model level validation succeeds"
 
-class InvalidData extends Errors {constructor(message, data, ...args) {super(message, ...args); this.data = data}}
+class InvalidData extends Error {constructor(message, data, ...args) {super(message, ...args); this.data = data}}
+class ValidationConflict extends Error {constructor(message, data, ...args) {super(message, ...args); this.data = data}}
 
-async function storeCreate(fields, {c}) {
+
+
+async function _storeCreate(fields, {c}) {
     let writeRes = null
 
     try {
@@ -26,7 +27,7 @@ async function storeCreate(fields, {c}) {
 /**
     @param {id, in Types} id
 */
-async function storeUpdate(id, fields, {c}) {
+async function _storeUpdate(id, fields, {c}) {
     let res = null
     try {
         res = await c.updateOne({_id: id}, {$set: fields})
@@ -40,7 +41,7 @@ async function storeUpdate(id, fields, {c}) {
     return true
 }
 
-async function storeGetById(id, {c, validateObjectId, m}) {
+async function _storeGetById(id, {c}) {
     const res = c.findOne({_id: id})
     return res
 }
@@ -48,31 +49,35 @@ async function storeGetById(id, {c, validateObjectId, m}) {
 /**
     @param {fields, in Types} fields
 */
-async function create(fields, {create, validate}) {
+async function _create(fields, {create, validate}) {
+    let res = null
     try {
-        await storeCreate(fields)
+        res = await create(fields)
     } catch(e) {
         if (!(e instanceof InvalidData)) throw e
 
         const errors = validate(fields)
 
-        if (!errors) throw new Error("mongodb validation fails while model level validation succeeds")
+        if (!errors) throw new ValidationConflict(VALIDATION_CONFLICT_MSG, {builtin: e})
         throw errors
     }
+
+    if (true !== res) throw new Error("create haven't thrown but didn't return true")
+    return true
 }
 
 /**
     @param {id, in Types} id
     @param {fields, in Types} fields
 */
-async function update(id, fields, {update, validate}) {
+async function _update(id, fields, {update, getById, validate, validateObjectId, containsId}) {
     // see do validation in a specialized method
     const idE = validateObjectId(id)
     if (idE) throw m.InvalidCriterion.create(idE.message, idE)
 
     // see do validation in a specialized method
     const idFieldName = containsId(fields)
-    if (idFieldName) throw {errors: [], node: {[idFieldName]: errors: [m.FieldUnknown.create(e.message, e)], node: null}}
+    if (idFieldName) throw {errors: [], node: {[idFieldName]: {errors: [m.FieldUnknown.create(`changing a document's id isn't allowed`)], node: null}}}
 
     let res = null
     try {
@@ -86,18 +91,28 @@ async function update(id, fields, {update, validate}) {
 
         const errors = validate(Object.assign(doc, fields))
 
-        if (!errors) throw new Error("mongodb validation fails while model level validation succeeds")
+        if (!errors) throw new ValidationConflict(VALIDATION_CONFLICT_MSG, {builtin: e})
         throw errors
     }
+
+    if (true !== res) throw new Error("update haven't thrown but didn't return true")
+    return true
 }
 
 /**
     @param {id, in Types} id
 */
-async function getById(id) {
+async function _getById(id, {getById, validateObjectId}) {
     // see do validation in a specialized method
     const idE = validateObjectId(id)
     if (idE) throw m.InvalidCriterion.create(idE.message, idE)
 
-    return storeGetById(id)
+    return getById(id)
+}
+
+export {
+    _storeCreate, _storeUpdate, _storeGetById,
+    _create, _update, _getById,
+    InvalidData, ValidationConflict,
+    VALIDATION_FAIL_MSG, VALIDATION_CONFLICT_MSG
 }

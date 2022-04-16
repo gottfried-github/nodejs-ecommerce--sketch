@@ -66,10 +66,15 @@ Presumably, there's no docs with `objectId`-invalid ids (because store makes sur
 ### do validation at the level of the store- methods
 id validation has to do with specifics of mongodb, which the controllers aren't concerned with. So the validation is ought to be done at the store- level.
 ### do validation in a specialized method
-The method encapsulates the mongodb logic and of itself provides an abstraction. Therefore it can be used in the controllers. 
+The method encapsulates the mongodb logic and of itself provides an abstraction. Therefore it can be used in the controllers.
 
 ## Prohibiting updating `_id`
 Including an `_id` in fields would modify the id of the document. If, for example, other documents reference the updated document, then we'd need to update those docs too. For now, I just don't allow to update document's id.
+
+# `_product-validate`, `_validateBSON`: handle non-existing `itemInitial`
+In `validate`, I don't check whether `itemInitial` is present in the fields before passing them to `_validateBSON`, because which fields should be validated against BSON is not the concern of `validate`: it's the concern of `_validateBSON`. Henceforth, `_validateBSON` should handle it itself. Before it handled it implicitly, because `ObjectId` just generates a new id if passed `undefined` or `null`. But handling it explicitly makes the code a bit more accessible.
+## What if `itemInitial` is set, but is `null` or `undefined`?
+Again, `ObjectId` simply generates a new id if passed either of those - hence generating no error. But for the case that `_validateBSON` is designed for this is not appropriate: `itemInitial` must be an existing value, that should be a valid `objectId`. But, `_validateBSON` is a private method, used only by `validate`, which makes sure that `itemInitial`, if any, is a string, before passing the fields to `_validateBSON`.
 
 # Setup
 ## The role of `migrate-mongo` in this project
@@ -79,14 +84,15 @@ I only use the `create` command to create migration files. This doesn't seem to 
 ## Behavior of the schema, defined in the `20220409125303-product-schema.js`
 See `~/basement/house/test/bazar-product-schema-mongodb` for examples of behavior for different data.
 
-# Testing output separately from input
+# Testing
+## Testing output separately from input
 Tests are first and foremost about the *output* of a component, not necessarily about it's *input*: there could be different components taking different input and generating the same output and the output of all such components should be validated against the same code.
 Of course, a concrete component has to be tested to generate specific outputs for specific inputs.
-## Example
+### Example
 For a certain input data, both `validate` and `_validateBSON` should return a single error - a BSONTypeError - regarding `itemInitial`. But the former should return it for `{isInSale: false, itemInitial: "an invalid id"}` or alike - while the latter will return it for, say `{itemInitial: "an invalid id"}`. In both cases the output is the same, but the input is different.
 Right now, `validate` doesn't pass the last two tests from `JSON-valid but BSON-invalid` because the data passed in is actually not JSON-valid.
 
-# `_product-validate`, testing `validate`
+## `_product-validate`, testing `validate`
 If we've tested the dependencies, we don't need to inject fake ones to test `validate`: we just need to make sure that:
     1. if data violates JSON rules, it returns errors, that pass the same tests as errors, returned by `filterErrors` do
     2. if data violates BSON rules, the corresponding errors are the same as `validateBSON` would return
@@ -94,13 +100,11 @@ If we've tested the dependencies, we don't need to inject fake ones to test `val
 
 But mainly, we have to make sure that it returns proper errors for data, violating a mixture of JSON and BSON rules.
 
-# `_product-validate`, testing `validate`: second take
+## `_product-validate`, testing `validate`: second take
 `validate` is essentially a controller more than it is a validation function. So it might be that it would make more sense to test whether it calls appropriate functions in appropriate cases, rather than test whether it performs correct data validation.
 
-# `_product-validate`, testing `_validateBSON`
+## `_product-validate`, testing `_validateBSON`
 The method is private, it's meant to be used by `validate`, which JSON-validate the data before passing it to the method. Henceforth, I only provide cases involving `itemInitial`. I compare the returned error (if any) with an error, generated for the same input by `mongodb` `ObjectId`.
 
-# `_product-validate`, `_validateBSON`: handle non-existing `itemInitial`
-In `validate`, I don't check whether `itemInitial` is present in the fields before passing them to `_validateBSON`, because which fields should be validated against BSON is not the concern of `validate`: it's the concern of `_validateBSON`. Henceforth, `_validateBSON` should handle it itself. Before it handled it implicitly, because `ObjectId` just generates a new id if passed `undefined` or `null`. But handling it explicitly makes the code a bit more accessible.
-## What if `itemInitial` is set, but is `null` or `undefined`?
-Again, `ObjectId` simply generates a new id if passed either of those - hence generating no error. But for the case that `_validateBSON` is designed for this is not appropriate: `itemInitial` must be an existing value, that should be a valid `objectId`. But, `_validateBSON` is a private method, used only by `validate`, which makes sure that `itemInitial`, if any, is a string, before passing the fields to `_validateBSON`.
+## `_product`, testing `_update`: the order of `validateObjectId` and `containsId` doesn't matter
+It doesn't matter which of the methods is called first and which is second. What matters: is that the data they return, if truthy, is thrown by `_update`, before `update` gets called. Thus, it doesn't matter whether one of the methods has been called before the other returned the truthy value.
