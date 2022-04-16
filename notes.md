@@ -71,6 +71,9 @@ The method encapsulates the mongodb logic and of itself provides an abstraction.
 ## Prohibiting updating `_id`
 Including an `_id` in fields would modify the id of the document. If, for example, other documents reference the updated document, then we'd need to update those docs too. For now, I just don't allow to update document's id.
 
+# `BazarMongo`: validating the passed database
+I should at least check that: the appropriate collections have schema validation enabled and the schemas are correct - that is, from the latest migration.
+
 # `_product-validate`, `_validateBSON`: handle non-existing `itemInitial`
 In `validate`, I don't check whether `itemInitial` is present in the fields before passing them to `_validateBSON`, because which fields should be validated against BSON is not the concern of `validate`: it's the concern of `_validateBSON`. Henceforth, `_validateBSON` should handle it itself. Before it handled it implicitly, because `ObjectId` just generates a new id if passed `undefined` or `null`. But handling it explicitly makes the code a bit more accessible.
 ## What if `itemInitial` is set, but is `null` or `undefined`?
