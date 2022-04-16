@@ -1,3 +1,8 @@
+import {assert} from 'chai'
+import * as m from 'bazar-api/src/messages.js'
+
+import {_getById, ValidationConflict} from '../src/_product.js'
+
 function testGetById() {
     describe("is passed an id", () => {
         it("passes the 'id' argument to validateObjectId", async () => {
@@ -18,7 +23,7 @@ function testGetById() {
             const getByIdCalls = []
             const idE = "a error with id"
             try {
-                await _getById("", {}, {
+                await _getById("", {
                     validateObjectId: () => {return idE},
                     getById: async () => {getByIdCalls.push(null)},
                 })
@@ -43,7 +48,7 @@ function testGetById() {
             const id = "an id", fields = "fields"
             let isEqual = null
 
-            await _getById(id, fields, {
+            await _getById(id, {
                 validateObjectId: () => {return false},
                 getById: async (_id) => {isEqual = id === _id},
             })
@@ -54,7 +59,16 @@ function testGetById() {
 
     describe("getById returns", () => {
         it("returns the returned value", async () => {
+            const data = "some data"
 
+            const res = await _getById("", {
+                validateObjectId: () => {return false},
+                getById: async () => {return data},
+            })
+
+            assert.strictEqual(res, data)
         })
     })
 }
+
+export {testGetById}
