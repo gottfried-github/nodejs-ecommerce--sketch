@@ -67,9 +67,12 @@ async function _create(fields, {create, validate}) {
         const errors = validate(fields)
 
         if (!errors) throw new ValidationConflict(VALIDATION_CONFLICT_MSG, {builtin: e})
+
+        // spec: validation failure
         throw errors
     }
 
+    // spec: success
     return id
 }
 
@@ -80,6 +83,8 @@ async function _create(fields, {create, validate}) {
 async function _update(id, fields, {update, getById, validate, validateObjectId, containsId}) {
     // see do validation in a specialized method
     const idE = validateObjectId(id)
+
+    // spec: invalid id
     if (idE) throw m.InvalidCriterion.create(idE.message, idE)
 
     // see do validation in a specialized method
@@ -99,21 +104,31 @@ async function _update(id, fields, {update, getById, validate, validateObjectId,
         const errors = validate(Object.assign(doc, fields))
 
         if (!errors) throw new ValidationConflict(VALIDATION_CONFLICT_MSG, {builtin: e})
+
+        // spec: validation failure
         throw errors
     }
 
+    // spec: no document with given id
     if (null === res) throw m.InvalidCriterion.create("id must be of an existing document: no document found with given id")
+
+    // spec: success
     return true
 }
 
 async function _delete(id, {storeDelete, validateObjectId}) {
     // see do validation in a specialized method
     const idE = validateObjectId(id)
+
+    // spec: invalid id
     if (idE) throw m.InvalidCriterion.create(idE.message, idE)
 
     const res = await storeDelete(id)
+
+    // spec: no document with given id
     if (null === res) throw m.InvalidCriterion.create("id must be of an existing document: no document found with given id")
 
+    // spec: success
     return true
 }
 
@@ -123,8 +138,11 @@ async function _delete(id, {storeDelete, validateObjectId}) {
 async function _getById(id, {getById, validateObjectId}) {
     // see do validation in a specialized method
     const idE = validateObjectId(id)
+
+    // spec: invalid id
     if (idE) throw m.InvalidCriterion.create(idE.message, idE)
 
+    // spec: success
     return getById(id)
 }
 
