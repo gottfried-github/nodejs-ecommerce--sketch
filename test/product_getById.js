@@ -1,5 +1,5 @@
 import {assert} from 'chai'
-import * as m from 'bazar-api/src/messages.js'
+import * as m from '../src/messages.js'
 
 import {_getById, ValidationConflict} from '../src/_product.js'
 

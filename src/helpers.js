@@ -1,4 +1,6 @@
 import {ObjectId} from 'mongodb'
+import {traverseTree} from 'ajv-errors-to-data-tree/src/helpers.js'
+import * as m from './messages.js'
 
 function _parseFirstOneOfItemPath(schemaPath) {
     const nodeNames = schemaPath.split('/')
@@ -36,6 +38,26 @@ function validateObjectId(id) {
 // see do validation in a specialized method
 function containsId(data) {
     return '_id' in data ? '_id' : false
+}
+
+function isValidBadInputTree(tree) {
+    try {
+        traverseTree(tree, (e) => {
+            // console.log("isValidBadInputTree, traversingTree, e:", e);
+            const badReqErrs = [(e) => m.FieldMissing.code === e.code, (e) => m.TypeErrorMsg.code === e.code, (e) => m.EmptyError.code === e.code, (e) => m.ValidationError.code === e.code]
+
+            if (!badReqErrs.map(isE => isE(e)).includes(true)) {
+                // console.log("isValidBadInputTree, traversingTree, e is not a badReqErr, e:", e);
+                throw m.InvalidErrorFormat.create()
+            }
+        })
+    } catch (e) {
+        if (m.InvalidErrorFormat.code !== e.code) throw e
+        // console.log("isValidBadInputTree, traverseTree thrown, e:", e)
+        return false
+    }
+
+    return true
 }
 
 export {_parseFirstOneOfItemPath, validateObjectId, containsId}
