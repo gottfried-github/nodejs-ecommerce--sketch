@@ -1,7 +1,7 @@
 import {ObjectId} from 'mongodb'
 import {BSONTypeError} from 'bson'
 
-import * as m from 'bazar-api/src/messages.js'
+import * as m from './messages.js'
 
 const VALIDATION_FAIL_MSG = "data validation failed"
 const VALIDATION_CONFLICT_MSG = "mongodb validation fails while model level validation succeeds"
