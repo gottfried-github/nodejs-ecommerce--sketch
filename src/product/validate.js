@@ -4,9 +4,9 @@ import {ObjectId} from 'mongodb'
 import {toTree} from 'ajv-errors-to-data-tree'
 import {traverseTree} from 'ajv-errors-to-data-tree/src/helpers.js'
 
-import * as m from 'bazar-api/src/messages.js'
+import * as m from '../messages.js'
 
-import {_parseFirstOneOfItemPath} from './helpers.js'
+import {_parseFirstOneOfItemPath} from '../helpers.js'
 
 const ajv = new Ajv({allErrors: true, strictRequired: true})
 

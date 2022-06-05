@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 import * as m from '../src/messages.js'
 
-import {_getById, ValidationConflict} from '../src/_product.js'
+import {_getById, ValidationConflict} from '../src/product/controllers.js'
 
 function testGetById() {
     describe("is passed an id", () => {

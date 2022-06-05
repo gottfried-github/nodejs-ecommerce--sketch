@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 import * as m from '../src/messages.js'
 
-import {_delete} from '../src/_product.js'
+import {_delete} from '../src/product/controllers.js'
 
 function testDelete() {
     describe("is passed an id", () => {

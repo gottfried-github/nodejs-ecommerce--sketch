@@ -1,7 +1,8 @@
 import {assert} from 'chai'
 import * as m from '../src/messages.js'
 
-import {_create, InvalidData, ValidationConflict} from '../src/_product.js'
+import {_create, ValidationConflict} from '../src/product/controllers.js'
+import {InvalidData} from '../src/product/store.js'
 
 function testCreate() {
     describe("create throws a non-InvalidData error", () => {

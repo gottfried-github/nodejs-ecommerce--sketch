@@ -1,10 +1,13 @@
-import {validateObjectId, containsId} from './helpers.js'
-import {validate} from './_product-validate.js'
+import {validateObjectId, containsId} from '../helpers.js'
+import {validate} from './validate.js'
 
 import {
-    _storeCreate, _storeUpdate, _storeDelete, _storeGetById,
+  _storeCreate, _storeUpdate, _storeDelete, _storeGetById,
+} from './store.js'
+
+import {
     _create, _update, _delete, _getById
-} from './_product.js'
+} from './controllers.js'
 
 function Product(c) {
     function storeCreate(fields) {

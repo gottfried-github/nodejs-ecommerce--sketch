@@ -1,7 +1,8 @@
 import {assert} from 'chai'
 import * as m from '../src/messages.js'
 
-import {_update, InvalidData, ValidationConflict} from '../src/_product.js'
+import {InvalidData} from '../src/product/store.js'
+import {_update, ValidationConflict} from '../src/product/controllers.js'
 
 function testUpdate() {
     describe("is passed an id", () => {

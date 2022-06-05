@@ -1,4 +1,4 @@
-# Bazar-mongo
+# E-commerce mongodb storage
 `mongodb` storage for an e-commerce. Implements the interface, defined in the [docs](#).
 
 # Usage
