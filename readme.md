@@ -38,6 +38,9 @@ async function crudProduct(product) {
 }
 ```
 
+# Test
+`npm run test`
+
 # Specification
 ## Validation error format
 `ajv-errors-to-data-tree`-formatted tree resembling the input data, with the errors being `ValidationError`, `FieldMissing`, `TypeErrorMsg`
