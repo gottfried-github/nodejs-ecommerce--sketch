@@ -1,14 +1,46 @@
-# Types
-## `id`
-a valid BSON `objectId`
+# Abstract specification
+## Validation error format
+`ajv-errors-to-data-tree`-formatted tree resembling the input data, with the errors being `ValidationError`, `FieldMissing`, `TypeErrorMsg`
 
-## `fields`
-An object with the following properties:
-* `isInSale`: `boolean`
-* `name`: `string`
-* `itemInitial`: a valid BSON `objectId`
+## create one
+### parameters
+  1. `fields`
 
-# update
-## parameters
-    1. **id:** `id`
-    2. **fields:** `fields`
+### behavior
+  success: return id of created document
+  validation failure: throw validation error
+
+Any other error will be treated as an internal error.
+
+## update one
+### parameters
+  1. `id`
+  2. `fields`
+
+### behavior
+  success: return `true`
+  invalid `id` or no document with given id: throw `InvalidCriterion`
+  validation failure: throw validation error
+
+Any other error will be treated as an internal error.
+
+## delete one
+### parameters
+  1. `id`
+
+### behavior
+  success: return `true`
+  invalid `id` or no document with given id: throw `InvalidCriterion`
+
+Any other error will be treated as an internal error.
+
+## getById
+### parameters
+  1. `id`
+
+### behavior
+  success: return the found document
+  no document found: return `null`
+  invalid id: throw `InvalidCriterion`
+
+Any other error will be treated as an internal error.
