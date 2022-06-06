@@ -1,6 +1,5 @@
 import bodyParser from 'body-parser'
 import {Router} from 'express'
-import {createProduct, updateProduct, getProductById} from '../data/product.js'
 import {productStripFields} from '../../helpers.js'
 
 function ensureFields(body) {
@@ -78,7 +77,7 @@ function product(product) {
         res.status(200).json(doc)
         // res.send('/product-update: endpoint is not implemented yet')
     }, handleUpdateMissingFields)
-    
+
     router.post('/delete', (req, res) => {
         res.send('/product-delete: endpoint is not implemented yet')
     })
@@ -99,4 +98,4 @@ function product(product) {
     return router
 }
 
-export default router
+export default product
