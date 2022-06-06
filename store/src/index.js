@@ -1,7 +1,6 @@
-import * as m from './messages.js'
 import Product from './product/index.js'
 
-function BazarMongo(db, client) {
+function store(db, client) {
     // first, validate db (see 'BazarMongo: validating the passed database')
 
     const product = Product(db.collection('product'))
@@ -9,4 +8,4 @@ function BazarMongo(db, client) {
     return {product}
 }
 
-export default BazarMongo
+export default store

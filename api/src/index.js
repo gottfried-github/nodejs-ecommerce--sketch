@@ -12,3 +12,5 @@ function api(store) {
 
     return router
 }
+
+export {api}

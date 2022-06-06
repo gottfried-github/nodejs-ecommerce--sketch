@@ -1,0 +1,20 @@
+{
+  "name": "bazar-mongo",
+  "version": "0.0.1",
+  "description": "A modular e-commerce application, implementing the specification, defined [here](#).",
+  "main": "helpers.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gottfried-github/nodejs-ecommerce_mongo--WIP.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gottfried-github/nodejs-ecommerce_mongo--WIP/issues"
+  },
+  "homepage": "https://github.com/gottfried-github/nodejs-ecommerce_mongo--WIP#readme"
+}

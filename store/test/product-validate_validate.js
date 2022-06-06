@@ -1,7 +1,7 @@
 import {assert} from 'chai'
 import {ObjectId} from 'mongodb'
 import {BSONTypeError} from 'bson'
-import {isValidBadInputTree} from '../src/helpers.js'
+import {isValidBadInputTree} from '../../helpers.js'
 
 import {testBSONErrors} from './product-validate_testBSONErrors.js'
 import {testJSONErrors} from './product-validate_testJSONErrors.js'

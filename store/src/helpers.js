@@ -1,6 +1,6 @@
 import {ObjectId} from 'mongodb'
 import {traverseTree} from 'ajv-errors-to-data-tree/src/helpers.js'
-import * as m from './messages.js'
+import * as m from '../messages.js'
 
 function _parseFirstOneOfItemPath(schemaPath) {
     const nodeNames = schemaPath.split('/')
