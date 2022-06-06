@@ -1,0 +1,22 @@
+{
+  "name": "nodejs-ecommerce_api",
+  "version": "0.0.1",
+  "description": "api for nodejs-ecommerce",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "/"
+  },
+  "keywords": [
+    "ecommerce"
+  ],
+  "author": "gottfried",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.1",
+    "http-errors": "^2.0.0"
+  }
+}
